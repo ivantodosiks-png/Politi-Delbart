@@ -7,13 +7,14 @@ import {
   Forward,
   PhoneIncoming,
   ShieldAlert,
+  Smartphone,
   Trash2,
   X,
   Zap
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-type Act = "idle" | "act1" | "spread" | "transition" | "act3" | "end_safe" | "end";
+type Act = "idle" | "act1" | "spread" | "transition" | "video" | "act3" | "end_safe" | "end";
 
 type ChatMsg = {
   id: string;
@@ -77,13 +78,12 @@ function PhoneFrame({
   dark?: boolean;
 }) {
   return (
-    <div className="rounded-[44px] border border-slate-200 bg-white p-3 shadow-sm">
+    <div className="w-full max-w-[420px] rounded-[44px] border border-slate-200 bg-white p-3 shadow-sm">
       <div
         className={[
-          "relative mx-auto overflow-hidden rounded-[36px] ring-1 ring-black/5",
+          "relative mx-auto h-[78dvh] min-h-[520px] w-full overflow-hidden rounded-[36px] ring-1 ring-black/5",
           dark ? "bg-slate-950 text-white" : "bg-white text-slate-900"
         ].join(" ")}
-        style={{ width: 340, height: 560 }}
       >
         {children}
       </div>
@@ -160,7 +160,13 @@ function NotiToast({ n, onClose }: { n: Noti; onClose: () => void }) {
   );
 }
 
-export default function PhoneGame() {
+export default function PhoneGame({
+  open,
+  onOpenChange
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
   const reduceMotion = useReducedMotion();
   const { setEnabled, beep } = useBeep();
 
@@ -206,6 +212,33 @@ export default function PhoneGame() {
     setAct("act1");
   }
 
+  function openExperience() {
+    onOpenChange(true);
+  }
+
+  function closeExperience() {
+    onOpenChange(false);
+  }
+
+  useEffect(() => {
+    if (!open) {
+      setAct("idle");
+      return;
+    }
+    reset();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") closeExperience();
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
   useEffect(() => {
     if (act === "idle") return;
 
@@ -235,19 +268,24 @@ export default function PhoneGame() {
     }
 
     if (act === "transition") {
-      const id = window.setTimeout(() => setAct("act3"), reduceMotion ? 250 : 900);
+      const id = window.setTimeout(() => setAct("video"), reduceMotion ? 200 : 650);
+      return () => window.clearTimeout(id);
+    }
+
+    if (act === "video") {
+      const id = window.setTimeout(() => setAct("act3"), reduceMotion ? 450 : 1400);
       return () => window.clearTimeout(id);
     }
 
     if (act === "act3") {
       let ticks = 0;
       const bad = [
-        "Er dette deg?",
-        "Alle har sett det",
-        "LOL",
+        "Har du sett deg selv?",
+        "Alle har den nå",
+        "LOL 😂",
         "Send uten sladd",
-        "Så flaut",
-        "Hvor fikk du det fra?",
+        "Så flaut…",
+        "Alle snakker om deg",
         "Dette er overalt"
       ];
       const neutral = ["Ny melding", "Ny kommentar", "Nytt varsel", "Noen tagget deg"];
@@ -309,53 +347,54 @@ export default function PhoneGame() {
     <section id="experience" className="border-t border-slate-200 bg-white">
       <Container>
         <div className="py-12 sm:py-14">
-          <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
-            <div className="max-w-xl">
-              <SectionTitle
-                eyebrow="Scenario"
-                title="Én klikk kan endre alt"
-                description={
-                  <>
-                    Opplev hvordan deling kan eskalere. Dette er en simulering med symbolske
-                    plassholdere — ikke ekte innhold.
-                  </>
-                }
+          <SectionTitle
+            eyebrow="Scenario"
+            title="Velg hva du gjør i chatten"
+            description="Trykk «Start scenario» øverst på siden. Scenarioet åpnes i fullskjerm."
+          />
+
+          <div className="mt-6 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={openExperience}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-700 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800"
+            >
+              <Smartphone className="h-4 w-4" />
+              Åpne scenario
+            </button>
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 hover:bg-slate-50">
+              <input
+                type="checkbox"
+                className="accent-blue-700"
+                checked={sound}
+                onChange={(e) => setSound(e.target.checked)}
               />
+              Lyd
+            </label>
+          </div>
+        </div>
+      </Container>
 
-              <div className="mt-6 flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-700 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800"
-                >
-                  Start scenario
-                </button>
-                <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 hover:bg-slate-50">
-                  <input
-                    type="checkbox"
-                    className="accent-blue-700"
-                    checked={sound}
-                    onChange={(e) => setSound(e.target.checked)}
-                  />
-                  Lyd
-                </label>
-              </div>
-
-              <div className="mt-6 rounded-sm border border-slate-200 bg-white p-5 text-sm text-slate-700">
-                <div className="flex items-start gap-3">
-                  <ShieldAlert className="mt-0.5 h-5 w-5 text-blue-700" />
-                  <div>
-                    <div className="font-semibold text-slate-900">Tenk før du deler</div>
-                    <div className="mt-1 leading-relaxed">
-                      Hvis du mottar et intimt bilde: ikke del videre, ta vare på bevis, og søk
-                      hjelp. Ved akutt fare: ring 112.
-                    </div>
-                  </div>
-                </div>
-              </div>
+      <AnimatePresence>
+        {open ? (
+          <motion.div
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <div className="absolute inset-x-0 top-0 flex items-center justify-between px-4 py-4">
+              <div className="text-sm font-semibold text-white">Delbart</div>
+              <button
+                type="button"
+                onClick={closeExperience}
+                className="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
+              >
+                Lukk
+              </button>
             </div>
 
-            <div className="w-full lg:max-w-[380px]">
+            <div className="flex h-full items-center justify-center px-4 pb-8 pt-16">
               <PhoneFrame dark>
                 <motion.div
                   className="absolute inset-0"
@@ -372,15 +411,17 @@ export default function PhoneGame() {
                 />
 
                 <div className="absolute inset-x-0 top-0 flex items-center justify-between px-4 py-3 text-[11px] text-white/70">
-                  <div className="rounded-full bg-white/10 px-2 py-1">Direkte</div>
+                  <div className="rounded-full bg-white/10 px-2 py-1">Snap</div>
                   <div className="rounded-full bg-white/10 px-2 py-1">
                     {act === "act3"
                       ? "Varsler"
                       : act === "spread"
                         ? "Spredning"
-                        : act === "end" || act === "end_safe"
-                          ? "Oppsummering"
-                          : "Meldinger"}
+                        : act === "video"
+                          ? "…"
+                          : act === "end" || act === "end_safe"
+                            ? "Oppsummering"
+                            : "Meldinger"}
                   </div>
                 </div>
 
@@ -498,6 +539,26 @@ export default function PhoneGame() {
                     </div>
                   ) : null}
 
+                  {act === "video" ? (
+                    <div className="grid h-full place-items-center text-center">
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="max-w-[280px] rounded-3xl border border-white/10 bg-black/40 p-5"
+                      >
+                        <div className="text-xs font-semibold uppercase tracking-wider text-white/70">
+                          Senere
+                        </div>
+                        <div className="mt-2 text-sm font-semibold text-white">
+                          Én videresending blir til mange.
+                        </div>
+                        <div className="mt-2 text-xs leading-relaxed text-white/75">
+                          Perspektivet skifter til den som rammes.
+                        </div>
+                      </motion.div>
+                    </div>
+                  ) : null}
+
                   {act === "act3" || act === "end" ? (
                     <motion.div
                       className="relative h-full"
@@ -511,6 +572,16 @@ export default function PhoneGame() {
                       <div className="text-sm font-semibold">Varsler</div>
                       <div className="mt-1 text-[11px] text-white/60">
                         Det stopper ikke når du prøver å lukke det.
+                      </div>
+
+                      <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
+                        <div className="text-[11px] font-semibold text-white/80">DM</div>
+                        <div className="mt-1 text-[13px] leading-snug text-white">
+                          Har du sett deg selv? Alle har fått den.
+                        </div>
+                        <div className="mt-1 text-[11px] text-white/60">
+                          Ukjent konto • akkurat nå
+                        </div>
                       </div>
 
                       <div className="mt-4 space-y-2">
@@ -541,23 +612,10 @@ export default function PhoneGame() {
                   ) : null}
                 </div>
               </PhoneFrame>
-
-              <div className="mt-4 rounded-sm border border-slate-200 bg-white p-4 text-sm text-slate-700">
-                <div className="flex items-start gap-3">
-                  <ShieldAlert className="mt-0.5 h-5 w-5 text-blue-700" />
-                  <div>
-                    <div className="font-semibold text-slate-900">Husk</div>
-                    <div className="mt-1 leading-relaxed">
-                      Ikke del intime bilder uten samtykke. Hvis du er utsatt, søk hjelp og ta vare
-                      på bevis.
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
-          </div>
-        </div>
-      </Container>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </section>
   );
 }
