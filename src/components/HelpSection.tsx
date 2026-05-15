@@ -1,85 +1,84 @@
 import Container from "./Container";
 import SectionTitle from "./SectionTitle";
-import { motion } from "framer-motion";
-import { CircleCheck, KeyRound, MailWarning, Shield, Smartphone } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { FileText, Phone, ShieldAlert, Trash2, UserRoundCheck } from "lucide-react";
 
-const tips = [
+const steps = [
   {
-    icon: MailWarning,
-    title: "Проверяй отправителя",
-    text: "Смотри домен, адрес и детали. Фишинг часто «почти» совпадает."
+    icon: Trash2,
+    title: "Stans spredning",
+    text: "Be om at innhold slettes. Ikke videresend. Ikke «lagre for sikkerhets skyld»."
   },
   {
-    icon: KeyRound,
-    title: "Пароли + 2FA",
-    text: "Менеджер паролей + второй фактор для почты, банка, соцсетей."
+    icon: FileText,
+    title: "Ta vare på bevis",
+    text: "Skjermbilder, lenker, brukernavn og tidspunkt. Noter hvor det ligger."
   },
   {
-    icon: Smartphone,
-    title: "Обновления",
-    text: "Включи авто‑обновления ОС и приложений, удаляй лишние программы."
+    icon: UserRoundCheck,
+    title: "Snakk med noen",
+    text: "Kontakt en trygg voksen, skole, helsetjeneste eller rådgiver. Du skal ikke stå alene."
   },
   {
-    icon: Shield,
-    title: "Сомневаешься — остановись",
-    text: "Перезвони по официальному номеру. Не действуй под давлением."
+    icon: ShieldAlert,
+    title: "Meld fra",
+    text: "Hvis du ønsker å anmelde eller få veiledning, ta kontakt med politiet."
   }
 ];
 
 export default function HelpSection() {
+  const reduceMotion = useReducedMotion();
+
   return (
-    <section id="help" className="border-t border-white/10 bg-slate-950">
+    <section id="help" className="border-t border-slate-200 bg-white">
       <Container>
-        <div className="py-14 lg:py-20">
+        <div className="py-12 sm:py-14">
           <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
             <SectionTitle
-              eyebrow="Помощь"
-              title="5 простых правил на каждый день"
-              description={
-                <>
-                  Это короткий набор привычек. Он занимает минуты, но экономит часы и деньги.
-                </>
-              }
+              eyebrow="Hjelp og kontakt"
+              title="Hva gjør du hvis et bilde deles uten samtykke?"
+              description="Dette er en generell veiledning. Ved akutt fare: ring 112."
             />
 
-            <div className="max-w-xl rounded-3xl border border-white/10 bg-gradient-to-b from-white/10 to-white/5 p-6 shadow-glow">
-              <div className="flex items-center gap-2 text-sm font-semibold text-white">
-                <CircleCheck className="h-5 w-5 text-emerald-300" />
-                Сохрани себе
+            <div className="w-full max-w-xl rounded-sm border border-slate-200 bg-white p-6">
+              <div className="text-sm font-semibold text-slate-900">Kontakt</div>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <a
+                  className="inline-flex items-center gap-2 rounded-sm border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 hover:bg-slate-100"
+                  href="tel:112"
+                >
+                  <Phone className="h-4 w-4 text-blue-700" />
+                  Nød: 112
+                </a>
+                <a
+                  className="inline-flex items-center gap-2 rounded-sm border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 hover:bg-slate-100"
+                  href="tel:02800"
+                >
+                  <Phone className="h-4 w-4 text-blue-700" />
+                  Politiet: 02800
+                </a>
               </div>
-              <div className="mt-2 text-xs text-slate-300">
-                Можно использовать как чек‑лист перед оплатой/вводом данных.
+
+              <div className="mt-4 text-sm text-slate-700">
+                Hvis du ikke vil ringe: snakk med en trygg voksen eller bruk lokale hjelpe- og
+                støttetjenester (skole, helsestasjon, rådgiver).
               </div>
-              <ul className="mt-5 space-y-3 text-sm">
-                {[
-                  "Не вводи коды и пароли по просьбе «службы безопасности».",
-                  "Не устанавливай приложения из неизвестных источников.",
-                  "Проверяй ссылки: домен, https, орфография, лишние символы.",
-                  "Делай резервные копии важных данных.",
-                  "Если сомневаешься — остановись и спроси взрослого/специалиста."
-                ].map((t) => (
-                  <li key={t} className="flex gap-3 text-slate-200">
-                    <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-sky-300" />
-                    <span className="leading-relaxed">{t}</span>
-                  </li>
-                ))}
-              </ul>
             </div>
           </div>
 
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {tips.map((tip, idx) => (
+            {steps.map((s, idx) => (
               <motion.div
-                key={tip.title}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                key={s.title}
+                initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-120px" }}
-                transition={{ duration: 0.5, delay: idx * 0.04 }}
-                className="rounded-3xl border border-white/10 bg-white/5 p-5"
+                transition={{ duration: 0.5, delay: idx * 0.03 }}
+                className="rounded-sm border border-slate-200 bg-white p-5"
               >
-                <tip.icon className="h-5 w-5 text-sky-300" />
-                <div className="mt-3 text-sm font-semibold text-white">{tip.title}</div>
-                <div className="mt-1 text-xs leading-relaxed text-slate-300">{tip.text}</div>
+                <s.icon className="h-5 w-5 text-blue-700" />
+                <div className="mt-3 text-sm font-semibold text-slate-900">{s.title}</div>
+                <div className="mt-2 text-sm leading-relaxed text-slate-700">{s.text}</div>
               </motion.div>
             ))}
           </div>
@@ -88,3 +87,4 @@ export default function HelpSection() {
     </section>
   );
 }
+

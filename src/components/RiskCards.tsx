@@ -1,66 +1,62 @@
 import Container from "./Container";
 import SectionTitle from "./SectionTitle";
-import { motion } from "framer-motion";
-import { Bug, Link2, PhoneCall, TriangleAlert } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { EyeOff, MessageCircleWarning, Siren, Users } from "lucide-react";
 
-const risks = [
+const cards = [
   {
-    icon: TriangleAlert,
-    title: "Срочность и давление",
-    text: "Если «нужно прямо сейчас», остановись. Проверь источник, перезвони по официальному номеру."
+    icon: Users,
+    title: "Spredning skjer raskt",
+    text: "Det som deles i en chat kan ende opp på mange plattformer på minutter."
   },
   {
-    icon: Link2,
-    title: "Ссылки из сообщений",
-    text: "Наведи курсор/долгий тап: смотри домен. Лучше набрать адрес вручную."
+    icon: EyeOff,
+    title: "Tap av kontroll",
+    text: "Når et bilde er delt videre, mister du ofte kontroll over hvem som ser det."
   },
   {
-    icon: Bug,
-    title: "Сомнительные файлы",
-    text: "Не открывай вложения от неизвестных. На телефоне — не устанавливай APK вне магазинов."
+    icon: MessageCircleWarning,
+    title: "Press og trusler",
+    text: "Mange opplever press, hets og rykter når innhold spres uten samtykke."
   },
   {
-    icon: PhoneCall,
-    title: "Звонки «из банка»",
-    text: "Не сообщай коды. Банк/полиция не просит одноразовые пароли и удалённый доступ."
+    icon: Siren,
+    title: "Straffbart",
+    text: "Deling av intime bilder uten samtykke kan være ulovlig. Det gjelder også videresending."
   }
 ];
 
 export default function RiskCards() {
+  const reduceMotion = useReducedMotion();
+
   return (
-    <section id="risks" className="border-t border-white/10 bg-slate-950">
+    <section className="border-t border-slate-200 bg-white">
       <Container>
-        <div className="py-14 lg:py-20">
+        <div className="py-12 sm:py-14">
           <SectionTitle
-            eyebrow="Риски"
-            title="4 ситуации, где чаще всего ошибаются"
-            description="Карточки ниже — это короткие «триггеры», которые помогают вовремя остановиться и проверить."
+            eyebrow="Konsekvenser"
+            title="Hvorfor «bare én gang» kan bli mange"
+            description="Målet er å forebygge: stopp spredningen tidlig, og søk hjelp hvis du er utsatt."
           />
 
           <div className="mt-10 grid gap-4 md:grid-cols-2">
-            {risks.map((r, idx) => (
+            {cards.map((c, idx) => (
               <motion.div
-                key={r.title}
-                initial={{ opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                key={c.title}
+                initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+                whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-120px" }}
-                transition={{ duration: 0.55, delay: idx * 0.05 }}
-                className="group rounded-3xl border border-white/10 bg-gradient-to-b from-white/8 to-white/5 p-6"
+                transition={{ duration: 0.5, delay: idx * 0.04 }}
+                className="rounded-sm border border-slate-200 bg-white p-6"
               >
                 <div className="flex items-start gap-4">
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                    <r.icon className="h-5 w-5 text-sky-300" />
+                  <div className="grid h-10 w-10 place-items-center rounded-sm bg-blue-50 text-blue-700">
+                    <c.icon className="h-5 w-5" />
                   </div>
                   <div>
-                    <div className="text-base font-semibold text-white">{r.title}</div>
-                    <div className="mt-2 text-sm leading-relaxed text-slate-300">{r.text}</div>
+                    <div className="text-base font-semibold text-slate-900">{c.title}</div>
+                    <div className="mt-2 text-sm leading-relaxed text-slate-700">{c.text}</div>
                   </div>
-                </div>
-
-                <div className="mt-5 h-px w-full bg-white/10" />
-
-                <div className="mt-4 text-xs text-slate-400">
-                  Подсказка: <span className="text-slate-200">если сомневаешься — проверь 2 раза.</span>
                 </div>
               </motion.div>
             ))}
@@ -70,3 +66,4 @@ export default function RiskCards() {
     </section>
   );
 }
+

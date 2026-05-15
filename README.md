@@ -1,19 +1,20 @@
-# React + Vite (Tailwind, Framer Motion, Lucide)
+# Politiet – «Én klikk kan endre alt»
 
-## Запуск
+React + Vite + Tailwind CSS + Framer Motion + Lucide.
+
+## Kjør lokalt
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Логотипы
+## Logoer
 
-Файлы-слоты для ваших логотипов:
+Bytt ut filene under med dine egne (behold filnavnene):
 
-- `src/assets/logo-main.png` (Header + Hero)
-- `src/assets/logo-footer.png` (Footer)
-- `src/assets/logo-partner.png` (Hero)
-
-Сейчас они заполнены вашим файлом `logos/deledelta-grnn-ikoner.png`. При необходимости просто замените картинки, сохранив имена файлов.
+- `src/assets/logo-police.webp` (toppmeny / hovedlogo)
+- `src/assets/logo-main.png` (valgfritt – brukes ikke i toppmeny nå)
+- `src/assets/logo-footer.png` (footer)
+- `src/assets/logo-partner.png` (valgfritt)
 
