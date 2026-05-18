@@ -1,4 +1,4 @@
-import Container from "./Container";
+﻿import Container from "./Container";
 import SectionTitle from "./SectionTitle";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
@@ -158,7 +158,7 @@ function MessageBubble({
             onPointerDown={() => onHoldStart(msg.id)}
             onPointerUp={onHoldEnd}
             onPointerCancel={onHoldEnd}
-            aria-label="Åpne bilde"
+            aria-label="Г…pne bilde"
           >
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
@@ -168,7 +168,7 @@ function MessageBubble({
                 <div>
                   <div className="text-[12px] font-semibold">{msg.label}</div>
                   <div className="mt-0.5 text-[11px] text-white/70">
-                    Tap to view • hold to view
+                    Tap to view вЂў hold to view
                   </div>
                 </div>
               </div>
@@ -176,7 +176,7 @@ function MessageBubble({
             </div>
 
             <div className="mt-2 overflow-hidden rounded-2xl bg-gradient-to-br from-white/18 to-white/6 p-3 ring-1 ring-white/10">
-              <div className="text-[11px] text-white/70">Sladdet forhåndsvisning</div>
+              <div className="text-[11px] text-white/70">Sladdet forhГҐndsvisning</div>
               <div className="mt-2 h-20 w-full rounded-xl bg-gradient-to-br from-white/20 to-white/5 blur-[2px]" />
             </div>
           </button>
@@ -200,7 +200,7 @@ function InputBar({ disabled }: { disabled: boolean }) {
         <Camera className="h-5 w-5" />
       </button>
       <div className="flex-1 rounded-full bg-white/10 px-4 py-2 text-[13px] text-white/70">
-        Skriv en melding…
+        Skriv en meldingвЂ¦
       </div>
       <button
         type="button"
@@ -237,28 +237,44 @@ function ChatCell({
   name,
   subtitle,
   isNew,
+  badge,
   onClick
 }: {
   name: string;
   subtitle: string;
   isNew?: boolean;
+  badge?: "new_snap" | "received" | "opened";
   onClick?: () => void;
 }) {
+  const badgeDot =
+    badge === "new_snap"
+      ? "bg-fuchsia-500"
+      : badge === "received"
+        ? "bg-rose-500"
+        : badge === "opened"
+          ? "bg-sky-500"
+          : "bg-white/25";
+
   return (
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center gap-3 border-b border-white/10 px-4 py-3 text-left hover:bg-white/5"
+      className="flex w-full items-center gap-3 border-b border-black/5 bg-white px-4 py-3 text-left text-slate-900 hover:bg-slate-50"
     >
-      <Avatar seed={name.length} />
+      <div className="relative">
+        <Avatar seed={name.length} />
+        <span
+          className={`absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full ring-2 ring-white ${badgeDot}`}
+        />
+      </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-3">
           <div className="truncate text-sm font-semibold">{name}</div>
-          {isNew ? <span className="h-2 w-2 rounded-full bg-sky-400" /> : null}
+          {isNew ? <span className="h-2 w-2 rounded-full bg-rose-500" /> : null}
         </div>
-        <div className="mt-0.5 truncate text-[12px] text-white/60">{subtitle}</div>
+        <div className="mt-0.5 truncate text-[12px] text-slate-600">{subtitle}</div>
       </div>
-      <div className="text-[12px] text-white/50">{isNew ? "New" : ""}</div>
+      <div className="text-[12px] text-slate-500">{isNew ? "New" : ""}</div>
     </button>
   );
 }
@@ -293,7 +309,7 @@ export default function PhoneGame({
 
   useEffect(() => setEnabled(sound), [sound, setEnabled]);
 
-  const reactions = useMemo(() => ["😂", "😳", "💀", "🔥", "👀", "😡"], []);
+  const reactions = useMemo(() => ["рџ‚", "рџі", "рџ’Ђ", "рџ”Ґ", "рџ‘Ђ", "рџЎ"], []);
 
   function closeExperience() {
     onOpenChange(false);
@@ -351,7 +367,7 @@ export default function PhoneGame({
     setTyping(false);
     setStatus(null);
     setMessages([
-      { id: uid(), kind: "snap", side: "friend", label: "Photo • 3s" },
+      { id: uid(), kind: "snap", side: "friend", label: "Photo вЂў 3s" },
       { id: uid(), kind: "status", side: "system", text: "New Snap", status: "Delivered" }
     ]);
     beep(880, 28, 0.012);
@@ -414,7 +430,7 @@ export default function PhoneGame({
     setTyping(true);
     const t1 = window.setTimeout(() => {
       setTyping(false);
-      pushMsg({ id: uid(), kind: "text", side: "friend", text: "bro look 💀" });
+      pushMsg({ id: uid(), kind: "text", side: "friend", text: "yoвЂ¦ sjekk dette рџі" });
       beep(880, 26, 0.012);
     }, 650);
 
@@ -424,21 +440,21 @@ export default function PhoneGame({
 
     const t3 = window.setTimeout(() => {
       setTyping(false);
-      pushMsg({ id: uid(), kind: "text", side: "friend", text: "don’t share this" });
+      pushMsg({ id: uid(), kind: "text", side: "friend", text: "ikke send det videre, ok?" });
       beep(880, 26, 0.012);
     }, 1550);
 
     const t4 = window.setTimeout(() => setTyping(true), 1880);
     const t5 = window.setTimeout(() => {
       setTyping(false);
-      pushMsg({ id: uid(), kind: "text", side: "friend", text: "but everyone is sending it" });
+      pushMsg({ id: uid(), kind: "text", side: "friend", text: "men folk deler det overalt nГҐвЂ¦" });
       beep(880, 26, 0.012);
     }, 2480);
 
     const t6 = window.setTimeout(() => setTyping(true), 2850);
     const t7 = window.setTimeout(() => {
       setTyping(false);
-      pushMsg({ id: uid(), kind: "text", side: "friend", text: "just forward it" });
+      pushMsg({ id: uid(), kind: "text", side: "friend", text: "bare send til Г©n person da рџ…" });
       beep(880, 26, 0.012);
       setChoiceReady(true);
     }, 3450);
@@ -512,12 +528,12 @@ export default function PhoneGame({
     let ticks = 0;
     const bad = [
       "har du sett deg selv?",
-      "everyone has it now",
-      "send uncensored",
-      "LOL 😂",
-      "this is everywhere",
-      "so embarrassing…",
-      "is this you?"
+      "alle har den nГҐ",
+      "send uten sladd",
+      "LOL рџ‚",
+      "dette er overalt",
+      "so embarrassingвЂ¦",
+      "er dette deg?"
     ];
 
     const id = window.setInterval(() => {
@@ -552,7 +568,7 @@ export default function PhoneGame({
           <SectionTitle
             eyebrow="Scenario"
             title="Fiktiv chat-app (forsvinnende meldinger)"
-            description="Du får et sladdet bilde. Velg hva du gjør. Etter «Forward» spiller vi en video (du legger den inn senere)."
+            description="Du fГҐr et sladdet bilde. Velg hva du gjГёr. Etter В«ForwardВ» spiller vi en video (du legger den inn senere)."
           />
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -597,27 +613,34 @@ export default function PhoneGame({
 
             <div className="flex h-full items-center justify-center px-4 pb-8 pt-16">
               <PhoneFrame>
-                <div className="absolute inset-x-0 top-0 z-10 border-b border-white/10 bg-black/30 px-3 py-3">
+                <div
+                  className={[
+                    "absolute inset-x-0 top-0 z-10 px-3 py-3",
+                    screen === "inbox"
+                      ? "border-b border-black/5 bg-white text-slate-900"
+                      : "border-b border-white/10 bg-black/30 text-white"
+                  ].join(" ")}
+                >
                   {screen === "inbox" ? (
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
                         <Avatar seed={3} />
                         <div>
                           <div className="text-sm font-semibold">Friends</div>
-                          <div className="mt-0.5 text-[11px] text-white/70">1 new</div>
+                          <div className="mt-0.5 text-[11px] text-slate-600">1 new</div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
-                          className="grid h-9 w-9 place-items-center rounded-full bg-white/10 hover:bg-white/15"
+                          className="grid h-9 w-9 place-items-center rounded-full bg-slate-100 hover:bg-slate-200"
                           aria-label="Søk"
                         >
                           <Search className="h-5 w-5" />
                         </button>
                         <button
                           type="button"
-                          className="grid h-9 w-9 place-items-center rounded-full bg-white/10 hover:bg-white/15"
+                          className="grid h-9 w-9 place-items-center rounded-full bg-slate-100 hover:bg-slate-200"
                           aria-label="Venner"
                         >
                           <Users className="h-5 w-5" />
@@ -663,21 +686,27 @@ export default function PhoneGame({
                 </div>
 
                 {screen === "inbox" ? (
-                  <div className="absolute inset-0 pt-[72px]">
+                  <div className="absolute inset-0 bg-white pt-[72px] text-slate-900">
                     <div className="h-full overflow-auto">
-                      <ChatCell name="Brigitte Wicks" subtitle="Received • 8h" />
-                      <ChatCell name="Jay Kanada" subtitle="Received • 1m" />
-                      <ChatCell name="Breakfast Club" subtitle="Chat from Adam • 4m" />
-                      <ChatCell name="June" subtitle="New Snap!" isNew onClick={openThread} />
-                      <ChatCell name="Suzie Freeman" subtitle="Delivered • 2h" />
-                      <ChatCell name="Piano Enthusiasts" subtitle="Opened • 2h" />
-                      <ChatCell name="Alex McQueen" subtitle="Received • 2h" />
-                      <ChatCell name="Brian Wu" subtitle="Received • 4h" />
-                      <ChatCell name="Sarah Lin" subtitle="Opened • 4h" />
+                      <ChatCell name="Brigitte Wicks" subtitle="Received • 8h" badge="received" />
+                      <ChatCell name="Jay Kanada" subtitle="Received • 1m" badge="received" />
+                      <ChatCell name="Breakfast Club" subtitle="Chat from Adam • 4m" badge="opened" />
+                      <ChatCell
+                        name="June"
+                        subtitle="New Snap! • just now"
+                        badge="new_snap"
+                        isNew
+                        onClick={openThread}
+                      />
+                      <ChatCell name="Suzie Freeman" subtitle="Delivered • 2h" badge="opened" />
+                      <ChatCell name="Piano Enthusiasts" subtitle="Opened • 2h" badge="opened" />
+                      <ChatCell name="Alex McQueen" subtitle="Received • 2h" badge="received" />
+                      <ChatCell name="Brian Wu" subtitle="Received • 4h" badge="received" />
+                      <ChatCell name="Sarah Lin" subtitle="Opened • 4h" badge="opened" />
                     </div>
 
-                    <div className="absolute inset-x-0 bottom-0 border-t border-white/10 bg-black/30 px-4 py-3">
-                      <div className="flex items-center justify-around text-white/70">
+                    <div className="absolute inset-x-0 bottom-0 border-t border-black/5 bg-white px-4 py-3 text-slate-600">
+                      <div className="flex items-center justify-around">
                         <div className="grid place-items-center gap-1 text-[11px]">
                           <Users className="h-5 w-5" />
                           Chat
@@ -773,7 +802,7 @@ export default function PhoneGame({
                           <div className="mt-3 flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-3">
                             <ShieldAlert className="mt-0.5 h-5 w-5 text-white/80" />
                             <div className="text-xs leading-relaxed text-white/75">
-                              Ved akutt fare: ring 112. For råd og veiledning: ring 02800.
+                              Ved akutt fare: ring 112. For rГҐd og veiledning: ring 02800.
                             </div>
                           </div>
                         </div>
@@ -812,7 +841,7 @@ export default function PhoneGame({
                         <div className="mt-3 overflow-hidden rounded-2xl ring-1 ring-white/10">
                           <div className="h-60 w-full bg-gradient-to-br from-white/15 to-white/5 blur-[1px]" />
                           <div className="absolute inset-x-0 bottom-0 px-4 py-3 text-[11px] text-white/70">
-                            {snapViewer.hold ? "Hold to view…" : "Opened (disappears soon)"}
+                            {snapViewer.hold ? "Hold to viewвЂ¦" : "Opened (disappears soon)"}
                           </div>
                         </div>
                         <div className="mt-3 text-[11px] text-white/70">
@@ -862,7 +891,7 @@ export default function PhoneGame({
                             <div>
                               <div className="font-semibold text-white">Video mangler</div>
                               <div className="mt-1 leading-relaxed text-white/70">
-                                Legg inn videoen som `public/scene-forward.mp4` (i prosjektet). Trykk «Skip» for å
+                                Legg inn videoen som `public/scene-forward.mp4` (i prosjektet). Trykk В«SkipВ» for ГҐ
                                 fortsette.
                               </div>
                             </div>
@@ -925,7 +954,7 @@ export default function PhoneGame({
                         <div>
                           <div className="font-semibold text-white">Screenshot taken</div>
                           <div className="mt-1 leading-relaxed text-white/70">
-                            Now it can be saved and shared again — without control.
+                            Now it can be saved and shared again вЂ” without control.
                           </div>
                         </div>
                       </div>
