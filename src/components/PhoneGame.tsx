@@ -9,13 +9,17 @@ import {
   Forward,
   Image as ImageIcon,
   MoreHorizontal,
+  Phone,
+  Plus,
   Search,
   Send,
   ShieldAlert,
   ShieldCheck,
   Trash2,
   TriangleAlert,
+  UserPlus,
   Users,
+  Video,
   X,
   Zap
 } from "lucide-react";
@@ -77,7 +81,7 @@ function useBeep() {
 function PhoneFrame({ children }: { children: React.ReactNode }) {
   return (
     <div className="w-full max-w-[460px] rounded-[46px] border border-slate-200 bg-white p-3 shadow-sm">
-      <div className="relative mx-auto h-[82dvh] min-h-[600px] w-full overflow-hidden rounded-[38px] bg-slate-950 text-white ring-1 ring-black/5">
+      <div className="relative mx-auto h-[82dvh] min-h-[600px] w-full overflow-hidden rounded-[38px] bg-white text-slate-900 ring-1 ring-black/5">
         {children}
       </div>
     </div>
@@ -95,6 +99,16 @@ function Avatar({ seed = 7 }: { seed?: number }) {
   return (
     <div className={`h-10 w-10 rounded-full bg-gradient-to-br ${c.join(" ")} ring-1 ring-white/15`} />
   );
+}
+
+function BadgeDot({ tone }: { tone: "new" | "received" | "opened" }) {
+  const dot =
+    tone === "new"
+      ? "bg-rose-500"
+      : tone === "received"
+        ? "bg-sky-500"
+        : "bg-emerald-500";
+  return <span className={`h-2.5 w-2.5 rounded-full ${dot}`} />;
 }
 
 function TypingDots() {
@@ -123,11 +137,13 @@ function StatusPill({ text, status }: { text: string; status?: MessageStatus }) 
 
 function MessageBubble({
   msg,
+  friendLabel,
   onOpenSnap,
   onHoldStart,
   onHoldEnd
 }: {
   msg: ChatMessage;
+  friendLabel: string;
   onOpenSnap: (id: string) => void;
   onHoldStart: (id: string) => void;
   onHoldEnd: () => void;
@@ -136,20 +152,16 @@ function MessageBubble({
 
   const isFriend = msg.side === "friend";
   const align = isFriend ? "justify-start" : "justify-end";
-  const bubble =
-    msg.kind === "snap"
-      ? isFriend
-        ? "bg-white/10 text-white ring-1 ring-white/10"
-        : "bg-blue-600 text-white ring-1 ring-white/10"
-      : isFriend
-        ? "bg-white/10 text-white"
-        : "bg-blue-600 text-white";
-
-  const base = "max-w-[84%] rounded-3xl px-3 py-2.5 text-[13px] leading-relaxed";
+  const base = "max-w-[86%] rounded-3xl px-3 py-2.5 text-[14px] leading-relaxed";
 
   return (
     <div className={`flex ${align}`}>
-      <div className={`${base} ${bubble}`}>
+      <div
+        className={[
+          base,
+          isFriend ? "bg-transparent" : "bg-slate-100 text-slate-900 ring-1 ring-black/5"
+        ].join(" ")}
+      >
         {msg.kind === "snap" ? (
           <button
             type="button"
@@ -158,30 +170,40 @@ function MessageBubble({
             onPointerDown={() => onHoldStart(msg.id)}
             onPointerUp={onHoldEnd}
             onPointerCancel={onHoldEnd}
-            aria-label="Г…pne bilde"
+            aria-label="Åpne bilde"
           >
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <div className="grid h-8 w-8 place-items-center rounded-2xl bg-black/30 ring-1 ring-white/10">
-                  <ImageIcon className="h-4 w-4" />
-                </div>
-                <div>
-                  <div className="text-[12px] font-semibold">{msg.label}</div>
-                  <div className="mt-0.5 text-[11px] text-white/70">
-                    Tap to view вЂў hold to view
+            <div className="rounded-2xl border border-slate-200 bg-white p-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <div className="grid h-8 w-8 place-items-center rounded-2xl bg-slate-100 ring-1 ring-black/5">
+                    <ImageIcon className="h-4 w-4 text-slate-700" />
+                  </div>
+                  <div>
+                    <div className="text-[12px] font-semibold text-slate-900">{msg.label}</div>
+                    <div className="mt-0.5 text-[11px] text-slate-500">
+                      Trykk for å åpne • hold for å se
+                    </div>
                   </div>
                 </div>
+                <div className="text-[11px] text-slate-500">{msg.openedAt ? "Åpnet" : "Mottatt"}</div>
               </div>
-              <div className="text-[11px] text-white/60">{msg.openedAt ? "Opened" : "Delivered"}</div>
-            </div>
 
-            <div className="mt-2 overflow-hidden rounded-2xl bg-gradient-to-br from-white/18 to-white/6 p-3 ring-1 ring-white/10">
-              <div className="text-[11px] text-white/70">Sladdet forhГҐndsvisning</div>
-              <div className="mt-2 h-20 w-full rounded-xl bg-gradient-to-br from-white/20 to-white/5 blur-[2px]" />
+              <div className="mt-2 overflow-hidden rounded-2xl bg-slate-50 p-3 ring-1 ring-black/5">
+                <div className="text-[11px] text-slate-500">Sladdet forhåndsvisning</div>
+                <div className="mt-2 h-20 w-full rounded-xl bg-gradient-to-br from-slate-200 to-slate-100 blur-[2px]" />
+              </div>
             </div>
           </button>
         ) : (
-          <span>{msg.text}</span>
+          <div className="flex items-start gap-3">
+            {isFriend ? <div className="mt-1 h-10 w-0.5 rounded-full bg-sky-500" /> : null}
+            <div>
+              {isFriend ? (
+                <div className="text-sm font-semibold text-sky-600">{friendLabel}</div>
+              ) : null}
+              <div className="text-[15px] leading-relaxed text-slate-900">{msg.text}</div>
+            </div>
+          </div>
         )}
       </div>
     </div>
@@ -190,17 +212,17 @@ function MessageBubble({
 
 function InputBar({ disabled }: { disabled: boolean }) {
   return (
-    <div className="flex items-center gap-2 border-t border-white/10 bg-black/25 px-3 py-3">
+    <div className="flex items-center gap-2 border-t border-black/5 bg-white px-3 py-3">
       <button
         type="button"
-        className="grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white/80 hover:bg-white/15 disabled:opacity-60"
+        className="grid h-10 w-10 place-items-center rounded-full bg-slate-100 text-slate-800 hover:bg-slate-200 disabled:opacity-60"
         aria-label="Kamera"
         disabled={disabled}
       >
         <Camera className="h-5 w-5" />
       </button>
-      <div className="flex-1 rounded-full bg-white/10 px-4 py-2 text-[13px] text-white/70">
-        Skriv en meldingвЂ¦
+      <div className="flex-1 rounded-full bg-slate-100 px-4 py-2 text-[13px] text-slate-500">
+        Send chat
       </div>
       <button
         type="button"
@@ -248,11 +270,11 @@ function ChatCell({
 }) {
   const badgeDot =
     badge === "new_snap"
-      ? "bg-fuchsia-500"
+      ? "bg-rose-500"
       : badge === "received"
-        ? "bg-rose-500"
+        ? "bg-sky-500"
         : badge === "opened"
-          ? "bg-sky-500"
+          ? "bg-emerald-500"
           : "bg-white/25";
 
   return (
@@ -296,6 +318,8 @@ export default function PhoneGame({
   const [choiceReady, setChoiceReady] = useState(false);
   const [status, setStatus] = useState<MessageStatus | null>(null);
   const [shake, setShake] = useState(0);
+  const [friendName, setFriendName] = useState("Elias");
+  const [friendSeed, setFriendSeed] = useState(9);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
@@ -366,8 +390,10 @@ export default function PhoneGame({
     setChoiceReady(false);
     setTyping(false);
     setStatus(null);
+    setFriendName("Elias");
+    setFriendSeed(9);
     setMessages([
-      { id: uid(), kind: "snap", side: "friend", label: "Photo вЂў 3s" },
+      { id: uid(), kind: "snap", side: "friend", label: "Bilde • 3s" },
       { id: uid(), kind: "status", side: "system", text: "New Snap", status: "Delivered" }
     ]);
     beep(880, 28, 0.012);
@@ -430,7 +456,7 @@ export default function PhoneGame({
     setTyping(true);
     const t1 = window.setTimeout(() => {
       setTyping(false);
-      pushMsg({ id: uid(), kind: "text", side: "friend", text: "yoвЂ¦ sjekk dette рџі" });
+      pushMsg({ id: uid(), kind: "text", side: "friend", text: "Hei… du må se dette 😳" });
       beep(880, 26, 0.012);
     }, 650);
 
@@ -440,21 +466,21 @@ export default function PhoneGame({
 
     const t3 = window.setTimeout(() => {
       setTyping(false);
-      pushMsg({ id: uid(), kind: "text", side: "friend", text: "ikke send det videre, ok?" });
+      pushMsg({ id: uid(), kind: "text", side: "friend", text: "ikke send det videre, seriøst" });
       beep(880, 26, 0.012);
     }, 1550);
 
     const t4 = window.setTimeout(() => setTyping(true), 1880);
     const t5 = window.setTimeout(() => {
       setTyping(false);
-      pushMsg({ id: uid(), kind: "text", side: "friend", text: "men folk deler det overalt nГҐвЂ¦" });
+      pushMsg({ id: uid(), kind: "text", side: "friend", text: "men alle deler det i grupper nå…" });
       beep(880, 26, 0.012);
     }, 2480);
 
     const t6 = window.setTimeout(() => setTyping(true), 2850);
     const t7 = window.setTimeout(() => {
       setTyping(false);
-      pushMsg({ id: uid(), kind: "text", side: "friend", text: "bare send til Г©n person da рџ…" });
+      pushMsg({ id: uid(), kind: "text", side: "friend", text: "bare send det til én da… 😅" });
       beep(880, 26, 0.012);
       setChoiceReady(true);
     }, 3450);
@@ -471,21 +497,21 @@ export default function PhoneGame({
   }, [open, phase, screen, beep]);
 
   function deleteSnap() {
-    pushMsg({ id: uid(), kind: "text", side: "me", text: "Delete." });
-    pushStatus("You stopped the spread", "Opened");
+    pushMsg({ id: uid(), kind: "text", side: "me", text: "Sletter." });
+    pushStatus("Du stoppet spredningen", "Opened");
     setPhase("end_safe");
     setChoiceReady(false);
   }
 
   function reportSnap() {
-    pushMsg({ id: uid(), kind: "text", side: "me", text: "Report." });
-    pushStatus("Report sent (simulation)", "Opened");
+    pushMsg({ id: uid(), kind: "text", side: "me", text: "Rapporterer." });
+    pushStatus("Rapport sendt (simulering)", "Opened");
     setPhase("end_safe");
     setChoiceReady(false);
   }
 
   function forwardSnap() {
-    pushMsg({ id: uid(), kind: "text", side: "me", text: "Forwarding..." });
+    pushMsg({ id: uid(), kind: "text", side: "me", text: "Sender videre..." });
     setChoiceReady(false);
 
     setStatus("Delivered");
@@ -618,32 +644,45 @@ export default function PhoneGame({
                     "absolute inset-x-0 top-0 z-10 px-3 py-3",
                     screen === "inbox"
                       ? "border-b border-black/5 bg-white text-slate-900"
-                      : "border-b border-white/10 bg-black/30 text-white"
+                      : "border-b border-black/5 bg-white text-slate-900"
                   ].join(" ")}
                 >
                   {screen === "inbox" ? (
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <Avatar seed={3} />
-                        <div>
-                          <div className="text-sm font-semibold">Friends</div>
-                          <div className="mt-0.5 text-[11px] text-slate-600">1 new</div>
+                        <div className="relative">
+                          <Avatar seed={3} />
+                          <span className="absolute -bottom-0.5 -right-0.5 grid h-5 w-5 place-items-center rounded-full bg-white ring-1 ring-black/10">
+                            <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                          </span>
                         </div>
+                        <div className="text-base font-semibold">Chat</div>
                       </div>
+
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
-                          className="grid h-9 w-9 place-items-center rounded-full bg-slate-100 hover:bg-slate-200"
+                          className="grid h-10 w-10 place-items-center rounded-full bg-slate-100 hover:bg-slate-200"
                           aria-label="Søk"
                         >
                           <Search className="h-5 w-5" />
                         </button>
                         <button
                           type="button"
-                          className="grid h-9 w-9 place-items-center rounded-full bg-slate-100 hover:bg-slate-200"
-                          aria-label="Venner"
+                          className="relative grid h-10 w-10 place-items-center rounded-full bg-slate-100 hover:bg-slate-200"
+                          aria-label="Varsler"
                         >
-                          <Users className="h-5 w-5" />
+                          <Zap className="h-5 w-5" />
+                          <span className="absolute right-1 top-1 grid h-4 w-4 place-items-center rounded-full bg-rose-500 text-[10px] font-semibold text-white">
+                            1
+                          </span>
+                        </button>
+                        <button
+                          type="button"
+                          className="grid h-10 w-10 place-items-center rounded-full bg-amber-300 text-slate-900 hover:bg-amber-200"
+                          aria-label="Legg til"
+                        >
+                          <UserPlus className="h-5 w-5" />
                         </button>
                       </div>
                     </div>
@@ -653,56 +692,69 @@ export default function PhoneGame({
                         <button
                           type="button"
                           onClick={backToInbox}
-                          className="grid h-9 w-9 place-items-center rounded-full bg-white/10 hover:bg-white/15"
+                          className="grid h-10 w-10 place-items-center rounded-full bg-slate-100 hover:bg-slate-200"
                           aria-label="Tilbake"
                         >
                           <ChevronLeft className="h-5 w-5" />
                         </button>
-                        <Avatar seed={9} />
-                        <div className="min-w-0">
-                          <div className="truncate text-sm font-semibold">venn</div>
-                          <div className="mt-0.5 flex items-center gap-2 text-[11px] text-white/70">
-                            <span className="inline-flex items-center gap-1">
-                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                              online
-                            </span>
-                            {typing ? (
-                              <span className="inline-flex items-center gap-2">
-                                typing <TypingDots />
-                              </span>
-                            ) : null}
+
+                        <div className="flex items-center gap-3">
+                          <Avatar seed={friendSeed} />
+                          <div className="min-w-0">
+                            <div className="truncate text-base font-semibold">{friendName}</div>
+                            <div className="mt-0.5 text-[11px] text-slate-500">
+                              {typing ? "skriver…" : "i dag"}
+                            </div>
                           </div>
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        className="grid h-9 w-9 place-items-center rounded-full bg-white/10 hover:bg-white/15"
-                        aria-label="Mer"
-                      >
-                        <MoreHorizontal className="h-5 w-5" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          className="grid h-10 w-10 place-items-center rounded-full bg-slate-100 hover:bg-slate-200"
+                          aria-label="Ring"
+                        >
+                          <Phone className="h-5 w-5" />
+                        </button>
+                        <button
+                          type="button"
+                          className="grid h-10 w-10 place-items-center rounded-full bg-slate-100 hover:bg-slate-200"
+                          aria-label="Video"
+                        >
+                          <Video className="h-5 w-5" />
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
 
                 {screen === "inbox" ? (
                   <div className="absolute inset-0 bg-white pt-[72px] text-slate-900">
+                    <div className="sticky top-0 z-10 border-b border-black/5 bg-white px-4 pb-2 pt-3">
+                      <div className="flex gap-6 overflow-auto text-sm font-semibold text-slate-700">
+                        {["Nær meg", "Samtaler", "Grupper", "Svar", "Bestevenner", "Streaks"].map((t) => (
+                          <div key={t} className="whitespace-nowrap">
+                            {t}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                     <div className="h-full overflow-auto">
-                      <ChatCell name="Brigitte Wicks" subtitle="Received • 8h" badge="received" />
-                      <ChatCell name="Jay Kanada" subtitle="Received • 1m" badge="received" />
-                      <ChatCell name="Breakfast Club" subtitle="Chat from Adam • 4m" badge="opened" />
+                      <ChatCell name="Maja" subtitle="Mottatt • 8 t" badge="received" />
+                      <ChatCell name="Noah" subtitle="Mottatt • 1 m" badge="received" />
+                      <ChatCell name="Sander" subtitle="Chat • 4 m" badge="opened" />
                       <ChatCell
-                        name="June"
-                        subtitle="New Snap! • just now"
+                        name="Elias"
+                        subtitle="Nytt bilde! • nå"
                         badge="new_snap"
                         isNew
                         onClick={openThread}
                       />
-                      <ChatCell name="Suzie Freeman" subtitle="Delivered • 2h" badge="opened" />
-                      <ChatCell name="Piano Enthusiasts" subtitle="Opened • 2h" badge="opened" />
-                      <ChatCell name="Alex McQueen" subtitle="Received • 2h" badge="received" />
-                      <ChatCell name="Brian Wu" subtitle="Received • 4h" badge="received" />
-                      <ChatCell name="Sarah Lin" subtitle="Opened • 4h" badge="opened" />
+                      <ChatCell name="Ida" subtitle="Levert • 2 t" badge="opened" />
+                      <ChatCell name="Aksel" subtitle="Åpnet • 2 t" badge="opened" />
+                      <ChatCell name="Linnea" subtitle="Mottatt • 2 t" badge="received" />
+                      <ChatCell name="Jonas" subtitle="Mottatt • 4 t" badge="received" />
+                      <ChatCell name="Hanna" subtitle="Åpnet • 4 t" badge="opened" />
                     </div>
 
                     <div className="absolute inset-x-0 bottom-0 border-t border-black/5 bg-white px-4 py-3 text-slate-600">
@@ -721,12 +773,28 @@ export default function PhoneGame({
                         </div>
                       </div>
                     </div>
+
+                    <button
+                      type="button"
+                      aria-label="Ny chat"
+                      className="absolute bottom-20 right-5 grid h-14 w-14 place-items-center rounded-full bg-amber-300 text-slate-900 shadow-lg ring-1 ring-black/10 hover:bg-amber-200"
+                    >
+                      <Plus className="h-6 w-6" />
+                    </button>
                   </div>
                 ) : (
                   <>
-                    <div className="absolute inset-x-0 bottom-14 top-[72px] px-4 py-4">
+                    <div className="absolute inset-x-0 top-[72px] border-b border-black/5 bg-slate-50 px-4 py-2 text-[12px] text-slate-600">
+                      Ikke gå glipp av meldinger fra {friendName}!{" "}
+                      <span className="font-semibold text-blue-700">Aktiver varsler</span>
+                    </div>
+
+                    <div className="absolute inset-x-0 bottom-14 top-[120px] bg-white px-4 py-4 text-slate-900">
                       <div className="flex h-full flex-col justify-end">
                         <div className="space-y-2 overflow-hidden">
+                          <div className="flex items-center justify-center py-1 text-[11px] font-semibold tracking-wider text-slate-400">
+                            I DAG
+                          </div>
                           <AnimatePresence initial={false}>
                             {messages.map((m) => (
                               <motion.div
@@ -738,6 +806,7 @@ export default function PhoneGame({
                               >
                                 <MessageBubble
                                   msg={m}
+                                  friendLabel={friendName}
                                   onOpenSnap={openSnap}
                                   onHoldStart={holdSnapStart}
                                   onHoldEnd={holdSnapEnd}
@@ -783,10 +852,10 @@ export default function PhoneGame({
                           <div className="flex items-start gap-3">
                             <ShieldCheck className="mt-0.5 h-5 w-5 text-emerald-200" />
                             <div>
-                              <div className="text-sm font-semibold text-white">You stopped the spread</div>
+                              <div className="text-sm font-semibold text-white">Du stoppet spredningen</div>
                               <div className="mt-1 text-xs leading-relaxed text-white/75">
-                                Deleting/reporting can be the most important choice. Save evidence and seek help if
-                                needed.
+                                Å slette/rapportere kan være det viktigste valget. Ta vare på bevis og søk hjelp ved
+                                behov.
                               </div>
                             </div>
                           </div>
@@ -795,14 +864,14 @@ export default function PhoneGame({
 
                       {phase === "end" ? (
                         <div className="rounded-3xl border border-white/10 bg-black/40 p-4">
-                          <div className="text-sm font-semibold text-white">For you it was one click.</div>
+                          <div className="text-sm font-semibold text-white">For deg var det ett klikk.</div>
                           <div className="mt-1 text-xs leading-relaxed text-white/75">
-                            For someone else it can change everything. Think before you share.
+                            For noen andre kan det endre alt. Tenk før du deler.
                           </div>
                           <div className="mt-3 flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-3">
                             <ShieldAlert className="mt-0.5 h-5 w-5 text-white/80" />
                             <div className="text-xs leading-relaxed text-white/75">
-                              Ved akutt fare: ring 112. For rГҐd og veiledning: ring 02800.
+                              Ved akutt fare: ring 112. For råd og veiledning: ring 02800.
                             </div>
                           </div>
                         </div>
@@ -969,4 +1038,5 @@ export default function PhoneGame({
     </section>
   );
 }
+
 
