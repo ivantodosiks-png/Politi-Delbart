@@ -1,39 +1,40 @@
-﻿import Container from "./Container";
+import Container from "./Container";
 import SectionTitle from "./SectionTitle";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   Camera,
   CheckCircle2,
   ChevronLeft,
-  Flag,
-  Forward,
-  Image as ImageIcon,
-  MoreHorizontal,
-  Phone,
-  Plus,
+  CircleAlert,
+  Link as LinkIcon,
+  Lock,
   Search,
   Send,
-  ShieldAlert,
+  Shield,
   ShieldCheck,
-  Trash2,
+  Sparkles,
   TriangleAlert,
-  UserPlus,
   Users,
-  Video,
   X,
   Zap
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-type Screen = "inbox" | "thread";
-type Phase = "idle" | "act1" | "video" | "victim" | "end_safe" | "end";
+type Screen = "inbox" | "thread" | "fake_site";
+type Phase =
+  | "idle"
+  | "act1"
+  | "popup"
+  | "allow_loading"
+  | "sextortion"
+  | "deny_good"
+  | "learn";
 type Side = "friend" | "me" | "system";
-type MessageStatus = "Delivered" | "Opened" | "Screenshot taken";
 
 type ChatMessage =
   | { id: string; kind: "text"; side: Side; text: string }
-  | { id: string; kind: "snap"; side: Side; label: string; openedAt?: number }
-  | { id: string; kind: "status"; side: "system"; text: string; status?: MessageStatus };
+  | { id: string; kind: "link"; side: Side; text: string; urlText: string }
+  | { id: string; kind: "status"; side: "system"; text: string };
 
 type ToastItem = { id: string; text: string; tone: "neutral" | "bad" };
 
@@ -45,43 +46,37 @@ function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
-function useBeep() {
+function useSound() {
   const enabledRef = useRef(false);
-  const audioRef = useRef<AudioContext | null>(null);
+  const audioRef = useRef<Record<string, HTMLAudioElement>>({});
 
   function setEnabled(v: boolean) {
     enabledRef.current = v;
   }
 
-  function beep(freq = 880, ms = 34, gain = 0.02) {
-    if (!enabledRef.current) return;
-    const Ctx =
-      window.AudioContext ||
-      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!Ctx) return;
-
-    if (!audioRef.current) audioRef.current = new Ctx();
-    const ctx = audioRef.current;
-    if (ctx.state === "suspended") ctx.resume().catch(() => {});
-
-    const osc = ctx.createOscillator();
-    const g = ctx.createGain();
-    osc.type = "sine";
-    osc.frequency.value = freq;
-    g.gain.value = gain;
-    osc.connect(g);
-    g.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + ms / 1000);
+  function prime(src: string) {
+    if (audioRef.current[src]) return;
+    const a = new Audio(src);
+    a.preload = "auto";
+    audioRef.current[src] = a;
   }
 
-  return { setEnabled, beep };
+  function play(src: string, volume = 0.6) {
+    if (!enabledRef.current) return;
+    const a = audioRef.current[src] ?? new Audio(src);
+    audioRef.current[src] = a;
+    a.volume = volume;
+    a.currentTime = 0;
+    a.play().catch(() => {});
+  }
+
+  return { setEnabled, prime, play };
 }
 
 function PhoneFrame({ children }: { children: React.ReactNode }) {
   return (
     <div className="w-full max-w-[460px] rounded-[46px] border border-slate-200 bg-white p-3 shadow-sm">
-      <div className="relative mx-auto h-[82dvh] min-h-[600px] w-full overflow-hidden rounded-[38px] bg-white text-slate-900 ring-1 ring-black/5">
+      <div className="relative mx-auto h-[84dvh] min-h-[620px] w-full overflow-hidden rounded-[38px] bg-white text-slate-900 ring-1 ring-black/5">
         {children}
       </div>
     </div>
@@ -97,109 +92,119 @@ function Avatar({ seed = 7 }: { seed?: number }) {
   ];
   const c = colors[seed % colors.length]!;
   return (
-    <div className={`h-10 w-10 rounded-full bg-gradient-to-br ${c.join(" ")} ring-1 ring-white/15`} />
+    <div className={`h-10 w-10 rounded-full bg-gradient-to-br ${c.join(" ")} ring-1 ring-black/10`} />
   );
 }
 
-function BadgeDot({ tone }: { tone: "new" | "received" | "opened" }) {
-  const dot =
-    tone === "new"
-      ? "bg-rose-500"
-      : tone === "received"
-        ? "bg-sky-500"
-        : "bg-emerald-500";
-  return <span className={`h-2.5 w-2.5 rounded-full ${dot}`} />;
-}
-
-function TypingDots() {
+function SafetyMeter({ value }: { value: number }) {
+  const pct = clamp(value, 0, 100);
+  const tone =
+    pct >= 70 ? "bg-emerald-500" : pct >= 40 ? "bg-amber-500" : "bg-rose-500";
   return (
-    <div className="flex items-center gap-1">
-      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white/70" />
-      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white/70 [animation-delay:120ms]" />
-      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white/70 [animation-delay:240ms]" />
-    </div>
-  );
-}
-
-function StatusPill({ text, status }: { text: string; status?: MessageStatus }) {
-  const icon =
-    status === "Screenshot taken" ? Zap : status === "Opened" ? CheckCircle2 : TriangleAlert;
-  const Icon = icon;
-  return (
-    <div className="flex justify-center">
-      <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[12px] text-white/80">
-        <Icon className="h-4 w-4 text-white/70" />
-        {text}
+    <div className="rounded-2xl border border-black/5 bg-white p-3 shadow-sm">
+      <div className="flex items-center justify-between text-[12px]">
+        <div className="inline-flex items-center gap-2 font-semibold text-slate-900">
+          <Shield className="h-4 w-4 text-blue-700" /> Digital trygghet
+        </div>
+        <div className="font-semibold text-slate-700">{pct}%</div>
+      </div>
+      <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+        <div className={`h-full ${tone}`} style={{ width: `${pct}%` }} />
+      </div>
+      <div className="mt-2 text-[11px] text-slate-600">
+        Høyere er bedre. Klikk og tillatelser kan påvirke tryggheten.
       </div>
     </div>
+  );
+}
+
+function TypingDots({ dark }: { dark: boolean }) {
+  const dot = dark ? "bg-white/70" : "bg-slate-500";
+  return (
+    <div className="flex items-center gap-1">
+      <span className={`h-1.5 w-1.5 animate-pulse rounded-full ${dot}`} />
+      <span className={`h-1.5 w-1.5 animate-pulse rounded-full ${dot} [animation-delay:120ms]`} />
+      <span className={`h-1.5 w-1.5 animate-pulse rounded-full ${dot} [animation-delay:240ms]`} />
+    </div>
+  );
+}
+
+function Toast({ text, tone }: { text: string; tone: "neutral" | "bad" }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -10, scale: 0.98 }}
+      transition={{ duration: 0.22 }}
+      className={[
+        "rounded-2xl border px-3 py-3 shadow-sm backdrop-blur",
+        tone === "bad"
+          ? "border-rose-500/25 bg-rose-500/10 text-white"
+          : "border-white/10 bg-white/10 text-white"
+      ].join(" ")}
+      role="status"
+      aria-live="polite"
+    >
+      <div className="text-[13px] leading-snug">{text}</div>
+    </motion.div>
   );
 }
 
 function MessageBubble({
   msg,
   friendLabel,
-  onOpenSnap,
-  onHoldStart,
-  onHoldEnd
+  onLinkClick
 }: {
   msg: ChatMessage;
   friendLabel: string;
-  onOpenSnap: (id: string) => void;
-  onHoldStart: (id: string) => void;
-  onHoldEnd: () => void;
+  onLinkClick: () => void;
 }) {
-  if (msg.kind === "status") return <StatusPill text={msg.text} status={msg.status} />;
+  if (msg.kind === "status") {
+    return (
+      <div className="flex justify-center">
+        <div className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-700">
+          <Sparkles className="h-4 w-4 text-slate-500" />
+          {msg.text}
+        </div>
+      </div>
+    );
+  }
 
   const isFriend = msg.side === "friend";
   const align = isFriend ? "justify-start" : "justify-end";
-  const base = "max-w-[86%] rounded-3xl px-3 py-2.5 text-[14px] leading-relaxed";
 
   return (
     <div className={`flex ${align}`}>
       <div
         className={[
-          base,
+          "max-w-[88%] rounded-3xl px-3 py-2.5 text-[14px] leading-relaxed",
           isFriend ? "bg-transparent" : "bg-slate-100 text-slate-900 ring-1 ring-black/5"
         ].join(" ")}
       >
-        {msg.kind === "snap" ? (
-          <button
-            type="button"
-            className="block w-full text-left"
-            onClick={() => onOpenSnap(msg.id)}
-            onPointerDown={() => onHoldStart(msg.id)}
-            onPointerUp={onHoldEnd}
-            onPointerCancel={onHoldEnd}
-            aria-label="Åpne bilde"
-          >
-            <div className="rounded-2xl border border-slate-200 bg-white p-3">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <div className="grid h-8 w-8 place-items-center rounded-2xl bg-slate-100 ring-1 ring-black/5">
-                    <ImageIcon className="h-4 w-4 text-slate-700" />
-                  </div>
-                  <div>
-                    <div className="text-[12px] font-semibold text-slate-900">{msg.label}</div>
-                    <div className="mt-0.5 text-[11px] text-slate-500">
-                      Trykk for å åpne • hold for å se
-                    </div>
-                  </div>
-                </div>
-                <div className="text-[11px] text-slate-500">{msg.openedAt ? "Åpnet" : "Mottatt"}</div>
-              </div>
-
-              <div className="mt-2 overflow-hidden rounded-2xl bg-slate-50 p-3 ring-1 ring-black/5">
-                <div className="text-[11px] text-slate-500">Sladdet forhåndsvisning</div>
-                <div className="mt-2 h-20 w-full rounded-xl bg-gradient-to-br from-slate-200 to-slate-100 blur-[2px]" />
-              </div>
+        {msg.kind === "link" ? (
+          <div className="flex items-start gap-3">
+            {isFriend ? <div className="mt-1 h-10 w-0.5 rounded-full bg-sky-500" /> : null}
+            <div>
+              {isFriend ? (
+                <div className="text-sm font-semibold text-sky-700">{friendLabel}</div>
+              ) : null}
+              <div className="text-[15px] leading-relaxed text-slate-900">{msg.text}</div>
+              <button
+                type="button"
+                onClick={onLinkClick}
+                className="mt-2 inline-flex items-center gap-2 rounded-2xl border border-black/5 bg-white px-3 py-2 text-[13px] font-semibold text-blue-700 hover:bg-slate-50"
+              >
+                <LinkIcon className="h-4 w-4" />
+                {msg.urlText}
+              </button>
             </div>
-          </button>
+          </div>
         ) : (
           <div className="flex items-start gap-3">
             {isFriend ? <div className="mt-1 h-10 w-0.5 rounded-full bg-sky-500" /> : null}
             <div>
               {isFriend ? (
-                <div className="text-sm font-semibold text-sky-600">{friendLabel}</div>
+                <div className="text-sm font-semibold text-sky-700">{friendLabel}</div>
               ) : null}
               <div className="text-[15px] leading-relaxed text-slate-900">{msg.text}</div>
             </div>
@@ -236,68 +241,45 @@ function InputBar({ disabled }: { disabled: boolean }) {
   );
 }
 
-function Toast({ text, tone }: { text: string; tone: "neutral" | "bad" }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -10, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -10, scale: 0.98 }}
-      transition={{ duration: 0.25 }}
-      className={[
-        "rounded-2xl border px-3 py-3 shadow-sm",
-        tone === "bad" ? "border-rose-500/25 bg-rose-500/10" : "border-white/10 bg-white/5"
-      ].join(" ")}
-      role="status"
-      aria-live="polite"
-    >
-      <div className="text-[13px] leading-snug text-white">{text}</div>
-    </motion.div>
-  );
-}
-
-function ChatCell({
-  name,
-  subtitle,
-  isNew,
-  badge,
-  onClick
+function FakeSite({
+  onRequestPhotos
 }: {
-  name: string;
-  subtitle: string;
-  isNew?: boolean;
-  badge?: "new_snap" | "received" | "opened";
-  onClick?: () => void;
+  onRequestPhotos: () => void;
 }) {
-  const badgeDot =
-    badge === "new_snap"
-      ? "bg-rose-500"
-      : badge === "received"
-        ? "bg-sky-500"
-        : badge === "opened"
-          ? "bg-emerald-500"
-          : "bg-white/25";
-
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex w-full items-center gap-3 border-b border-black/5 bg-white px-4 py-3 text-left text-slate-900 hover:bg-slate-50"
-    >
-      <div className="relative">
-        <Avatar seed={name.length} />
-        <span
-          className={`absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full ring-2 ring-white ${badgeDot}`}
-        />
-      </div>
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-3">
-          <div className="truncate text-sm font-semibold">{name}</div>
-          {isNew ? <span className="h-2 w-2 rounded-full bg-rose-500" /> : null}
+    <div className="h-full bg-slate-950 text-white">
+      <div className="flex items-center justify-between border-b border-white/10 bg-black/35 px-4 py-3">
+        <div className="inline-flex items-center gap-2 text-[12px] text-white/80">
+          <Lock className="h-4 w-4" />
+          snap-profile-story.net
         </div>
-        <div className="mt-0.5 truncate text-[12px] text-slate-600">{subtitle}</div>
+        <div className="text-[12px] text-white/60">Story viewer</div>
       </div>
-      <div className="text-[12px] text-slate-500">{isNew ? "New" : ""}</div>
-    </button>
+
+      <div className="p-5">
+        <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
+          <div className="text-sm font-semibold">Se story</div>
+          <div className="mt-2 text-xs leading-relaxed text-white/70">
+            Denne siden ser “ekte” ut, men URL-en er ukjent og ber om tilgang. Vær alltid skeptisk til lenker.
+          </div>
+
+          <div className="mt-4 overflow-hidden rounded-2xl ring-1 ring-white/10">
+            <div className="h-44 w-full bg-gradient-to-br from-white/10 to-white/5 blur-[1px]" />
+            <div className="border-t border-white/10 bg-black/30 px-4 py-3 text-[12px] text-white/75">
+              Tap to view
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={onRequestPhotos}
+            className="mt-5 w-full rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-500"
+          >
+            Åpne
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -309,31 +291,33 @@ export default function PhoneGame({
   onOpenChange: (v: boolean) => void;
 }) {
   const reduceMotion = useReducedMotion();
-  const { setEnabled, beep } = useBeep();
+  const { setEnabled, prime, play } = useSound();
 
   const [sound, setSound] = useState(false);
   const [screen, setScreen] = useState<Screen>("inbox");
   const [phase, setPhase] = useState<Phase>("idle");
   const [typing, setTyping] = useState(false);
   const [choiceReady, setChoiceReady] = useState(false);
-  const [status, setStatus] = useState<MessageStatus | null>(null);
-  const [shake, setShake] = useState(0);
   const [friendName, setFriendName] = useState("Elias");
   const [friendSeed, setFriendSeed] = useState(9);
 
+  const [safety, setSafety] = useState(85);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
-  const [floaters, setFloaters] = useState<Array<{ id: string; x: number; y: number; t: string }>>([]);
+  const [stress, setStress] = useState(0);
+  const [galleryFx, setGalleryFx] = useState<Array<{ id: string; x: number; y: number; d: number }>>([]);
 
-  const [snapViewer, setSnapViewer] = useState<{ id: string; hold: boolean } | null>(null);
-  const holdTimer = useRef<number | null>(null);
-  const closeTimer = useRef<number | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [videoError, setVideoError] = useState(false);
+  const reactions = useMemo(() => ["😂", "😳", "💀", "🔥", "👀", "😡"], []);
+  const [floaters, setFloaters] = useState<Array<{ id: string; x: number; y: number; t: string }>>([]);
 
   useEffect(() => setEnabled(sound), [sound, setEnabled]);
 
-  const reactions = useMemo(() => ["рџ‚", "рџі", "рџ’Ђ", "рџ”Ґ", "рџ‘Ђ", "рџЎ"], []);
+  useEffect(() => {
+    // sound placeholders (files can be added later)
+    prime("/sfx/notification.mp3");
+    prime("/sfx/warning.mp3");
+    prime("/sfx/success.mp3");
+  }, [prime]);
 
   function closeExperience() {
     onOpenChange(false);
@@ -348,13 +332,14 @@ export default function PhoneGame({
     setPhase("idle");
     setTyping(false);
     setChoiceReady(false);
-    setStatus(null);
-    setShake(0);
+    setFriendName("Elias");
+    setFriendSeed(9);
+    setSafety(85);
     setMessages([]);
     setToasts([]);
+    setStress(0);
     setFloaters([]);
-    setSnapViewer(null);
-    setVideoError(false);
+    setGalleryFx([]);
   }
 
   useEffect(() => {
@@ -380,23 +365,22 @@ export default function PhoneGame({
     setMessages((prev) => [...prev, msg]);
   }
 
-  function pushStatus(text: string, s?: MessageStatus) {
-    pushMsg({ id: uid(), kind: "status", side: "system", text, status: s });
-  }
-
   function openThread() {
     setScreen("thread");
     setPhase("act1");
     setChoiceReady(false);
     setTyping(false);
-    setStatus(null);
-    setFriendName("Elias");
-    setFriendSeed(9);
     setMessages([
-      { id: uid(), kind: "snap", side: "friend", label: "Bilde • 3s" },
-      { id: uid(), kind: "status", side: "system", text: "New Snap", status: "Delivered" }
+      { id: uid(), kind: "status", side: "system", text: "I dag" },
+      {
+        id: uid(),
+        kind: "link",
+        side: "friend",
+        text: "BRO ER DETTE DEG!!!?? 😭💀\nSjekk denne…",
+        urlText: "snap-profile-story.net"
+      }
     ]);
-    beep(880, 28, 0.012);
+    play("/sfx/notification.mp3", 0.45);
   }
 
   function backToInbox() {
@@ -404,48 +388,11 @@ export default function PhoneGame({
     setPhase("idle");
     setTyping(false);
     setChoiceReady(false);
-    setStatus(null);
     setMessages([]);
     setToasts([]);
+    setStress(0);
+    setGalleryFx([]);
     setFloaters([]);
-    setSnapViewer(null);
-    setVideoError(false);
-  }
-
-  function markSnapOpened(id: string) {
-    setMessages((prev) =>
-      prev.map((m) => (m.kind === "snap" && m.id === id ? { ...m, openedAt: Date.now() } : m))
-    );
-  }
-
-  function openSnap(id: string) {
-    markSnapOpened(id);
-    setSnapViewer({ id, hold: false });
-    pushStatus("Opened", "Opened");
-    setStatus("Opened");
-    beep(740, 32, 0.012);
-
-    if (closeTimer.current) window.clearTimeout(closeTimer.current);
-    closeTimer.current = window.setTimeout(() => setSnapViewer(null), 1500);
-  }
-
-  function holdSnapStart(id: string) {
-    if (reduceMotion) return;
-    if (holdTimer.current) window.clearTimeout(holdTimer.current);
-    holdTimer.current = window.setTimeout(() => {
-      markSnapOpened(id);
-      setSnapViewer({ id, hold: true });
-      beep(720, 26, 0.012);
-    }, 120);
-  }
-
-  function holdSnapEnd() {
-    if (holdTimer.current) window.clearTimeout(holdTimer.current);
-    if (snapViewer?.hold) {
-      setSnapViewer(null);
-      pushStatus("Opened", "Opened");
-      setStatus("Opened");
-    }
   }
 
   useEffect(() => {
@@ -454,147 +401,140 @@ export default function PhoneGame({
     if (phase !== "act1") return;
 
     setTyping(true);
-    const t1 = window.setTimeout(() => {
-      setTyping(false);
-      pushMsg({ id: uid(), kind: "text", side: "friend", text: "Hei… du må se dette 😳" });
-      beep(880, 26, 0.012);
-    }, 650);
-
+    const t1 = window.setTimeout(() => setTyping(false), 900);
     const t2 = window.setTimeout(() => {
-      setTyping(true);
-    }, 980);
-
-    const t3 = window.setTimeout(() => {
-      setTyping(false);
-      pushMsg({ id: uid(), kind: "text", side: "friend", text: "ikke send det videre, seriøst" });
-      beep(880, 26, 0.012);
-    }, 1550);
-
-    const t4 = window.setTimeout(() => setTyping(true), 1880);
-    const t5 = window.setTimeout(() => {
-      setTyping(false);
-      pushMsg({ id: uid(), kind: "text", side: "friend", text: "men alle deler det i grupper nå…" });
-      beep(880, 26, 0.012);
-    }, 2480);
-
-    const t6 = window.setTimeout(() => setTyping(true), 2850);
-    const t7 = window.setTimeout(() => {
-      setTyping(false);
-      pushMsg({ id: uid(), kind: "text", side: "friend", text: "bare send det til én da… 😅" });
-      beep(880, 26, 0.012);
+      pushMsg({ id: uid(), kind: "text", side: "friend", text: "Trykk på linken fort 😅" });
+      play("/sfx/notification.mp3", 0.45);
       setChoiceReady(true);
-    }, 3450);
-
+    }, 1200);
     return () => {
       window.clearTimeout(t1);
       window.clearTimeout(t2);
-      window.clearTimeout(t3);
-      window.clearTimeout(t4);
-      window.clearTimeout(t5);
-      window.clearTimeout(t6);
-      window.clearTimeout(t7);
     };
-  }, [open, phase, screen, beep]);
+  }, [open, phase, play, screen]);
 
-  function deleteSnap() {
-    pushMsg({ id: uid(), kind: "text", side: "me", text: "Sletter." });
-    pushStatus("Du stoppet spredningen", "Opened");
-    setPhase("end_safe");
-    setChoiceReady(false);
+  function onLinkClick() {
+    // Educational: clicking unknown link is a risk
+    setSafety((s) => Math.max(10, s - 18));
+    setScreen("fake_site");
   }
 
-  function reportSnap() {
-    pushMsg({ id: uid(), kind: "text", side: "me", text: "Rapporterer." });
-    pushStatus("Rapport sendt (simulering)", "Opened");
-    setPhase("end_safe");
-    setChoiceReady(false);
+  function requestPhotosPopup() {
+    setPhase("popup");
   }
 
-  function forwardSnap() {
-    pushMsg({ id: uid(), kind: "text", side: "me", text: "Sender videre..." });
-    setChoiceReady(false);
+  function denyAccess() {
+    setSafety((s) => Math.min(100, s + 10));
+    play("/sfx/success.mp3", 0.5);
+    setPhase("deny_good");
+  }
 
-    setStatus("Delivered");
-    pushStatus("Delivered", "Delivered");
-
-    const t1 = window.setTimeout(() => {
-      setStatus("Opened");
-      pushStatus("Opened", "Opened");
-      beep(760, 26, 0.012);
-    }, 700);
-
-    const t2 = window.setTimeout(() => {
-      setStatus("Screenshot taken");
-      pushStatus("Someone took a screenshot", "Screenshot taken");
-      beep(640, 26, 0.012);
-    }, 1400);
-
-    const t3 = window.setTimeout(() => {
-      setPhase("video");
-    }, 1900);
-
-    return () => {
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
-      window.clearTimeout(t3);
-    };
+  function allowAccess() {
+    setSafety((s) => Math.max(0, s - 35));
+    play("/sfx/warning.mp3", 0.6);
+    setPhase("allow_loading");
   }
 
   useEffect(() => {
     if (!open) return;
-    if (phase !== "video") return;
-    const v = videoRef.current;
-    if (v) v.play().catch(() => {});
-  }, [open, phase]);
+    if (phase !== "allow_loading") return;
+
+    const t = window.setTimeout(() => setPhase("sextortion"), reduceMotion ? 350 : 900);
+    return () => window.clearTimeout(t);
+  }, [open, phase, reduceMotion]);
 
   useEffect(() => {
     if (!open) return;
-    if (phase !== "victim") return;
+    if (phase !== "sextortion") return;
 
-    let ticks = 0;
+    pushMsg({ id: uid(), kind: "text", side: "friend", text: "…" });
+
     const bad = [
-      "har du sett deg selv?",
-      "alle har den nГҐ",
-      "send uten sladd",
-      "LOL рџ‚",
-      "dette er overalt",
-      "so embarrassingвЂ¦",
-      "er dette deg?"
+      "Vi har alle bildene dine nå 🙂",
+      "Send 500 kr eller vi sender bildene til foreldrene dine.",
+      "Svar raskt."
     ];
 
+    let i = 0;
     const id = window.setInterval(() => {
-      ticks += 1;
-      const tone: ToastItem["tone"] = Math.random() < 0.72 ? "bad" : "neutral";
-      const text = tone === "bad" ? bad[Math.floor(Math.random() * bad.length)]! : "new notification";
-      setToasts((prev) => [{ id: uid(), text, tone }, ...prev].slice(0, 6));
+      const txt = bad[i];
+      if (!txt) return;
+      i += 1;
+      setToasts((prev) => [{ id: uid(), text: txt, tone: "bad" as const }, ...prev].slice(0, 6));
+      play("/sfx/warning.mp3", 0.55);
+      if (!reduceMotion) setStress((s) => (s + 1) % 4);
 
-      if (!reduceMotion) setShake((s) => (s + 1) % 4);
-      beep(tone === "bad" ? 640 : 880, 26, 0.013);
-
-      if (!reduceMotion && Math.random() < 0.4) {
+      if (!reduceMotion) {
         const rx = clamp(Math.random(), 0.12, 0.88);
-        const ry = clamp(Math.random(), 0.2, 0.7);
+        const ry = clamp(Math.random(), 0.22, 0.78);
         const em = reactions[Math.floor(Math.random() * reactions.length)]!;
         setFloaters((f) => [...f.slice(-10), { id: uid(), x: rx, y: ry, t: em }]);
       }
 
-      if (ticks >= 18) {
-        window.clearInterval(id);
-        setPhase("end");
+      if (!reduceMotion) {
+        // blurred gallery thumbnails "flying away"
+        const items = Array.from({ length: 8 }).map(() => ({
+          id: uid(),
+          x: Math.random(),
+          y: Math.random(),
+          d: (Math.random() * 2 - 1) * 1
+        }));
+        setGalleryFx(items);
+        window.setTimeout(() => setGalleryFx([]), 1200);
       }
-    }, reduceMotion ? 300 : 190);
+
+      if (i >= bad.length) {
+        window.clearInterval(id);
+        window.setTimeout(() => setPhase("learn"), reduceMotion ? 400 : 1400);
+      }
+    }, reduceMotion ? 360 : 260);
 
     return () => window.clearInterval(id);
-  }, [beep, open, phase, reactions, reduceMotion]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, phase]);
+
+  function tryAgain() {
+    resetScenario();
+    setScreen("thread");
+    setPhase("act1");
+    setMessages([
+      { id: uid(), kind: "status", side: "system", text: "I dag" },
+      {
+        id: uid(),
+        kind: "link",
+        side: "friend",
+        text: "BRO ER DETTE DEG!!!?? 😭💀\nSjekk denne…",
+        urlText: "snap-profile-story.net"
+      }
+    ]);
+    setSafety(85);
+    setChoiceReady(true);
+  }
+
+  function goProtection() {
+    closeExperience();
+    window.setTimeout(() => {
+      document.getElementById("help")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 150);
+  }
+
+  const inboxNames = useMemo(
+    () => [
+      { name: "Maja", sub: "Mottatt • 8 t" },
+      { name: "Noah", sub: "Mottatt • 1 m" },
+      { name: "Linnea", sub: "Åpnet • 2 t" }
+    ],
+    []
+  );
 
   return (
     <section id="experience" className="border-t border-slate-200 bg-white">
       <Container>
         <div className="py-12 sm:py-14">
           <SectionTitle
-            eyebrow="Scenario"
-            title="Fiktiv chat-app (forsvinnende meldinger)"
-            description="Du fГҐr et sladdet bilde. Velg hva du gjГёr. Etter В«ForwardВ» spiller vi en video (du legger den inn senere)."
+            eyebrow="Mini‑spill"
+            title="Digital safety: phishing og sextortion"
+            description="Dette er en educational awareness-opplevelse. Den viser risiko ved falske lenker og press/utpressing, uten å lære bort hacking."
           />
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -639,26 +579,23 @@ export default function PhoneGame({
 
             <div className="flex h-full items-center justify-center px-4 pb-8 pt-16">
               <PhoneFrame>
-                <div
-                  className={[
-                    "absolute inset-x-0 top-0 z-10 px-3 py-3",
-                    screen === "inbox"
-                      ? "border-b border-black/5 bg-white text-slate-900"
-                      : "border-b border-black/5 bg-white text-slate-900"
-                  ].join(" ")}
-                >
-                  {screen === "inbox" ? (
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <div className="relative">
-                          <Avatar seed={3} />
-                          <span className="absolute -bottom-0.5 -right-0.5 grid h-5 w-5 place-items-center rounded-full bg-white ring-1 ring-black/10">
-                            <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-                          </span>
-                        </div>
-                        <div className="text-base font-semibold">Chat</div>
-                      </div>
+                {/* Phone status bar */}
+                <div className="absolute left-0 right-0 top-0 z-20 flex items-center justify-between bg-white px-5 py-3 text-[12px] text-slate-700">
+                  <div className="font-semibold">09:06</div>
+                  <div className="inline-flex items-center gap-2 text-slate-500">
+                    <span className="h-1.5 w-10 rounded-full bg-slate-200" />
+                    <span className="h-3 w-3 rounded-full bg-slate-200" />
+                    <span className="h-3 w-3 rounded-full bg-slate-200" />
+                  </div>
+                </div>
 
+                <div className="absolute inset-x-0 top-[44px] z-10 border-b border-black/5 bg-white px-4 py-3">
+                  {screen === "inbox" ? (
+                    <div className="flex items-center justify-between">
+                      <div className="grid h-10 w-10 place-items-center rounded-full bg-slate-100">
+                        <Avatar seed={3} />
+                      </div>
+                      <div className="text-base font-semibold">Chat</div>
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
@@ -669,20 +606,10 @@ export default function PhoneGame({
                         </button>
                         <button
                           type="button"
-                          className="relative grid h-10 w-10 place-items-center rounded-full bg-slate-100 hover:bg-slate-200"
-                          aria-label="Varsler"
-                        >
-                          <Zap className="h-5 w-5" />
-                          <span className="absolute right-1 top-1 grid h-4 w-4 place-items-center rounded-full bg-rose-500 text-[10px] font-semibold text-white">
-                            1
-                          </span>
-                        </button>
-                        <button
-                          type="button"
                           className="grid h-10 w-10 place-items-center rounded-full bg-amber-300 text-slate-900 hover:bg-amber-200"
-                          aria-label="Legg til"
+                          aria-label="Venner"
                         >
-                          <UserPlus className="h-5 w-5" />
+                          <Users className="h-5 w-5" />
                         </button>
                       </div>
                     </div>
@@ -697,7 +624,6 @@ export default function PhoneGame({
                         >
                           <ChevronLeft className="h-5 w-5" />
                         </button>
-
                         <div className="flex items-center gap-3">
                           <Avatar seed={friendSeed} />
                           <div className="min-w-0">
@@ -712,89 +638,83 @@ export default function PhoneGame({
                         <button
                           type="button"
                           className="grid h-10 w-10 place-items-center rounded-full bg-slate-100 hover:bg-slate-200"
-                          aria-label="Ring"
+                          aria-label="Info"
                         >
-                          <Phone className="h-5 w-5" />
-                        </button>
-                        <button
-                          type="button"
-                          className="grid h-10 w-10 place-items-center rounded-full bg-slate-100 hover:bg-slate-200"
-                          aria-label="Video"
-                        >
-                          <Video className="h-5 w-5" />
+                          <CircleAlert className="h-5 w-5" />
                         </button>
                       </div>
                     </div>
                   )}
                 </div>
 
+                {/* Safety meter (overlay on both screens) */}
+                <div className="absolute left-4 right-4 top-[110px] z-10">
+                  <SafetyMeter value={safety} />
+                </div>
+
                 {screen === "inbox" ? (
-                  <div className="absolute inset-0 bg-white pt-[72px] text-slate-900">
-                    <div className="sticky top-0 z-10 border-b border-black/5 bg-white px-4 pb-2 pt-3">
+                  <div className="absolute inset-0 bg-white pt-[200px]">
+                    <div className="sticky top-[200px] z-0 px-4 pb-3">
                       <div className="flex gap-6 overflow-auto text-sm font-semibold text-slate-700">
-                        {["Nær meg", "Samtaler", "Grupper", "Svar", "Bestevenner", "Streaks"].map((t) => (
+                        {["Nær meg", "Samtaler", "Grupper", "Svar", "Bestevenner"].map((t) => (
                           <div key={t} className="whitespace-nowrap">
                             {t}
                           </div>
                         ))}
                       </div>
                     </div>
-                    <div className="h-full overflow-auto">
-                      <ChatCell name="Maja" subtitle="Mottatt • 8 t" badge="received" />
-                      <ChatCell name="Noah" subtitle="Mottatt • 1 m" badge="received" />
-                      <ChatCell name="Sander" subtitle="Chat • 4 m" badge="opened" />
-                      <ChatCell
-                        name="Elias"
-                        subtitle="Nytt bilde! • nå"
-                        badge="new_snap"
-                        isNew
+
+                    <div className="mt-2">
+                      {inboxNames.map((c) => (
+                        <div
+                          key={c.name}
+                          className="flex items-center gap-3 border-b border-black/5 bg-white px-4 py-3"
+                        >
+                          <Avatar seed={c.name.length} />
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm font-semibold">{c.name}</div>
+                            <div className="mt-0.5 text-[12px] text-slate-600">{c.sub}</div>
+                          </div>
+                          <button
+                            type="button"
+                            className="rounded-full bg-slate-100 px-3 py-2 text-[12px] font-semibold text-slate-800 hover:bg-slate-200"
+                          >
+                            Kamera
+                          </button>
+                        </div>
+                      ))}
+
+                      <button
+                        type="button"
                         onClick={openThread}
-                      />
-                      <ChatCell name="Ida" subtitle="Levert • 2 t" badge="opened" />
-                      <ChatCell name="Aksel" subtitle="Åpnet • 2 t" badge="opened" />
-                      <ChatCell name="Linnea" subtitle="Mottatt • 2 t" badge="received" />
-                      <ChatCell name="Jonas" subtitle="Mottatt • 4 t" badge="received" />
-                      <ChatCell name="Hanna" subtitle="Åpnet • 4 t" badge="opened" />
+                        className="flex w-full items-center gap-3 border-b border-black/5 bg-white px-4 py-3 text-left hover:bg-slate-50"
+                      >
+                        <Avatar seed={friendSeed} />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="truncate text-sm font-semibold">{friendName}</div>
+                            <span className="h-2 w-2 rounded-full bg-rose-500" />
+                          </div>
+                          <div className="mt-0.5 truncate text-[12px] text-slate-600">
+                            Nytt snap • nå
+                          </div>
+                        </div>
+                        <div className="text-[12px] font-semibold text-rose-600">New</div>
+                      </button>
                     </div>
-
-                    <div className="absolute inset-x-0 bottom-0 border-t border-black/5 bg-white px-4 py-3 text-slate-600">
-                      <div className="flex items-center justify-around">
-                        <div className="grid place-items-center gap-1 text-[11px]">
-                          <Users className="h-5 w-5" />
-                          Chat
-                        </div>
-                        <div className="grid place-items-center gap-1 text-[11px]">
-                          <Camera className="h-5 w-5" />
-                          Kamera
-                        </div>
-                        <div className="grid place-items-center gap-1 text-[11px]">
-                          <Send className="h-5 w-5" />
-                          Send
-                        </div>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      aria-label="Ny chat"
-                      className="absolute bottom-20 right-5 grid h-14 w-14 place-items-center rounded-full bg-amber-300 text-slate-900 shadow-lg ring-1 ring-black/10 hover:bg-amber-200"
-                    >
-                      <Plus className="h-6 w-6" />
-                    </button>
                   </div>
-                ) : (
+                ) : null}
+
+                {screen === "thread" ? (
                   <>
-                    <div className="absolute inset-x-0 top-[72px] border-b border-black/5 bg-slate-50 px-4 py-2 text-[12px] text-slate-600">
-                      Ikke gå glipp av meldinger fra {friendName}!{" "}
+                    <div className="absolute inset-x-0 top-[200px] border-b border-black/5 bg-slate-50 px-4 py-2 text-[12px] text-slate-600">
+                      Ikke gå glipp av chats fra {friendName}!{" "}
                       <span className="font-semibold text-blue-700">Aktiver varsler</span>
                     </div>
 
-                    <div className="absolute inset-x-0 bottom-14 top-[120px] bg-white px-4 py-4 text-slate-900">
+                    <div className="absolute inset-x-0 bottom-14 top-[248px] bg-white px-4 py-4">
                       <div className="flex h-full flex-col justify-end">
                         <div className="space-y-2 overflow-hidden">
-                          <div className="flex items-center justify-center py-1 text-[11px] font-semibold tracking-wider text-slate-400">
-                            I DAG
-                          </div>
                           <AnimatePresence initial={false}>
                             {messages.map((m) => (
                               <motion.div
@@ -807,73 +727,49 @@ export default function PhoneGame({
                                 <MessageBubble
                                   msg={m}
                                   friendLabel={friendName}
-                                  onOpenSnap={openSnap}
-                                  onHoldStart={holdSnapStart}
-                                  onHoldEnd={holdSnapEnd}
+                                  onLinkClick={onLinkClick}
                                 />
                               </motion.div>
                             ))}
                           </AnimatePresence>
+
+                          {typing ? (
+                            <div className="flex justify-start">
+                              <div className="rounded-3xl bg-slate-100 px-4 py-3">
+                                <TypingDots dark={false} />
+                              </div>
+                            </div>
+                          ) : null}
                         </div>
                       </div>
                     </div>
 
                     <div className="absolute inset-x-0 bottom-14 px-4 pb-3">
-                      {phase === "act1" && choiceReady ? (
-                        <div className="grid gap-2">
+                      {choiceReady ? (
+                        <div className="grid grid-cols-2 gap-2">
                           <button
                             type="button"
-                            onClick={forwardSnap}
+                            onClick={() => {
+                              // good choice: do nothing with the link
+                              setSafety((s) => Math.min(100, s + 8));
+                              setPhase("deny_good");
+                              play("/sfx/success.mp3", 0.5);
+                            }}
+                            className="rounded-2xl border border-black/5 bg-white px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-50"
+                          >
+                            Ignorer
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              // risky choice
+                              onLinkClick();
+                            }}
                             className="inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-500"
                           >
-                            <Forward className="h-4 w-4" /> Forward
+                            <LinkIcon className="h-4 w-4" />
+                            Åpne lenke
                           </button>
-                          <div className="grid grid-cols-2 gap-2">
-                            <button
-                              type="button"
-                              onClick={deleteSnap}
-                              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white hover:bg-white/10"
-                            >
-                              <Trash2 className="h-4 w-4" /> Delete
-                            </button>
-                            <button
-                              type="button"
-                              onClick={reportSnap}
-                              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white hover:bg-white/10"
-                            >
-                              <Flag className="h-4 w-4" /> Report
-                            </button>
-                          </div>
-                        </div>
-                      ) : null}
-
-                      {phase === "end_safe" ? (
-                        <div className="rounded-3xl border border-emerald-400/25 bg-emerald-500/10 p-4">
-                          <div className="flex items-start gap-3">
-                            <ShieldCheck className="mt-0.5 h-5 w-5 text-emerald-200" />
-                            <div>
-                              <div className="text-sm font-semibold text-white">Du stoppet spredningen</div>
-                              <div className="mt-1 text-xs leading-relaxed text-white/75">
-                                Å slette/rapportere kan være det viktigste valget. Ta vare på bevis og søk hjelp ved
-                                behov.
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      ) : null}
-
-                      {phase === "end" ? (
-                        <div className="rounded-3xl border border-white/10 bg-black/40 p-4">
-                          <div className="text-sm font-semibold text-white">For deg var det ett klikk.</div>
-                          <div className="mt-1 text-xs leading-relaxed text-white/75">
-                            For noen andre kan det endre alt. Tenk før du deler.
-                          </div>
-                          <div className="mt-3 flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-3">
-                            <ShieldAlert className="mt-0.5 h-5 w-5 text-white/80" />
-                            <div className="text-xs leading-relaxed text-white/75">
-                              Ved akutt fare: ring 112. For råd og veiledning: ring 02800.
-                            </div>
-                          </div>
                         </div>
                       ) : null}
                     </div>
@@ -882,154 +778,305 @@ export default function PhoneGame({
                       <InputBar disabled />
                     </div>
                   </>
-                )}
+                ) : null}
 
-                <AnimatePresence>
-                  {snapViewer ? (
-                    <motion.div
-                      className="absolute inset-0 z-30 grid place-items-center bg-black/80 p-6"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      onClick={() => setSnapViewer(null)}
-                      role="dialog"
-                      aria-label="Bildevisning"
-                    >
-                      <div className="w-full max-w-[340px] rounded-3xl border border-white/10 bg-black/50 p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="text-[12px] font-semibold text-white/80">Photo (symbolic)</div>
-                          <button
-                            type="button"
-                            className="rounded-full bg-white/10 p-2 text-white hover:bg-white/15"
-                            onClick={() => setSnapViewer(null)}
-                            aria-label="Lukk"
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </div>
-                        <div className="mt-3 overflow-hidden rounded-2xl ring-1 ring-white/10">
-                          <div className="h-60 w-full bg-gradient-to-br from-white/15 to-white/5 blur-[1px]" />
-                          <div className="absolute inset-x-0 bottom-0 px-4 py-3 text-[11px] text-white/70">
-                            {snapViewer.hold ? "Hold to viewвЂ¦" : "Opened (disappears soon)"}
-                          </div>
-                        </div>
-                        <div className="mt-3 text-[11px] text-white/70">
-                          No real content. This is a symbolic placeholder only.
-                        </div>
-                      </div>
-                    </motion.div>
-                  ) : null}
-                </AnimatePresence>
+                {/* Fake site screen */}
+                {screen === "fake_site" ? (
+                  <div className="absolute inset-0 top-[44px] z-10">
+                    <FakeSite onRequestPhotos={requestPhotosPopup} />
+                  </div>
+                ) : null}
 
+                {/* Popup */}
                 <AnimatePresence>
-                  {phase === "video" ? (
+                  {screen === "fake_site" && phase === "popup" ? (
                     <motion.div
-                      className="absolute inset-0 z-40 bg-black/90 p-5"
+                      className="absolute inset-0 z-40 grid place-items-center bg-black/55 p-6"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="text-sm font-semibold text-white">Video</div>
-                        <button
-                          type="button"
-                          onClick={() => setPhase("victim")}
-                          className="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
-                        >
-                          Skip
-                        </button>
-                      </div>
-
-                      <div className="mt-4 overflow-hidden rounded-3xl border border-white/10 bg-black/40">
-                        <video
-                          ref={videoRef}
-                          className="h-[62dvh] min-h-[360px] w-full object-cover"
-                          src="/scene-forward.mp4"
-                          playsInline
-                          controls
-                          autoPlay
-                          onError={() => setVideoError(true)}
-                          onEnded={() => setPhase("victim")}
-                        />
-                      </div>
-
-                      {videoError ? (
-                        <div className="mt-4 rounded-3xl border border-amber-400/30 bg-amber-400/10 p-4 text-xs text-white/85">
-                          <div className="flex items-start gap-3">
-                            <Zap className="mt-0.5 h-4 w-4 text-amber-200" />
-                            <div>
-                              <div className="font-semibold text-white">Video mangler</div>
-                              <div className="mt-1 leading-relaxed text-white/70">
-                                Legg inn videoen som `public/scene-forward.mp4` (i prosjektet). Trykk В«SkipВ» for ГҐ
-                                fortsette.
-                              </div>
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                        transition={{ duration: 0.22 }}
+                        className="w-full max-w-[340px] rounded-3xl border border-white/10 bg-slate-950/90 p-5 text-white shadow-xl backdrop-blur"
+                        role="dialog"
+                        aria-label="Tillatelse"
+                      >
+                        <div className="flex items-start gap-3">
+                          <TriangleAlert className="mt-0.5 h-5 w-5 text-amber-300" />
+                          <div>
+                            <div className="text-sm font-semibold">Allow access to photos?</div>
+                            <div className="mt-1 text-xs leading-relaxed text-white/70">
+                              Ukjent side ber om tilgang til bildene dine. Dette kan være phishing.
                             </div>
                           </div>
                         </div>
-                      ) : null}
+                        <div className="mt-4 grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={denyAccess}
+                            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white hover:bg-white/10"
+                          >
+                            Deny
+                          </button>
+                          <button
+                            type="button"
+                            onClick={allowAccess}
+                            className="rounded-2xl bg-rose-600 px-4 py-3 text-sm font-semibold text-white hover:bg-rose-500"
+                          >
+                            Allow
+                          </button>
+                        </div>
+                      </motion.div>
                     </motion.div>
                   ) : null}
                 </AnimatePresence>
 
+                {/* Allow loading */}
                 <AnimatePresence>
-                  {phase === "victim" ? (
+                  {phase === "allow_loading" ? (
                     <motion.div
-                      className="pointer-events-none absolute inset-x-0 top-[76px] z-30 px-4"
-                      animate={
-                        !reduceMotion
-                          ? { x: shake === 0 ? 0 : shake === 1 ? -2 : shake === 2 ? 2 : -1 }
-                          : undefined
-                      }
-                      transition={{ duration: 0.1 }}
+                      className="absolute inset-0 z-50 grid place-items-center bg-slate-950 text-white"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
                     >
-                      <div className="space-y-2">
-                        <AnimatePresence initial={false}>
-                          {toasts.map((t) => (
-                            <Toast key={t.id} text={t.text} tone={t.tone} />
-                          ))}
-                        </AnimatePresence>
+                      <div className="w-full max-w-[320px] rounded-3xl border border-white/10 bg-white/5 p-6 text-center">
+                        <div className="text-sm font-semibold">Laster…</div>
+                        <div className="mt-2 text-xs text-white/70">
+                          Dette er hvordan falske sider kan føles “normale”.
+                        </div>
+                        <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-white/10">
+                          <motion.div
+                            className="h-full bg-rose-500"
+                            initial={{ width: "8%" }}
+                            animate={{ width: "100%" }}
+                            transition={{ duration: reduceMotion ? 0.4 : 1.0 }}
+                          />
+                        </div>
                       </div>
                     </motion.div>
                   ) : null}
                 </AnimatePresence>
 
+                {/* Sextortion / stress */}
                 <AnimatePresence>
-                  {phase === "victim" && !reduceMotion
-                    ? floaters.map((f) => (
-                        <motion.div
-                          key={f.id}
-                          initial={{ opacity: 0, scale: 0.9 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.35 }}
-                          className="pointer-events-none absolute z-20 text-xl"
-                          style={{
-                            left: `${f.x * 100}%`,
-                            top: `${f.y * 100}%`,
-                            transform: "translate(-50%, -50%)"
-                          }}
-                        >
-                          {f.t}
-                        </motion.div>
-                      ))
-                    : null}
-                </AnimatePresence>
+                  {phase === "sextortion" ? (
+                    <motion.div
+                      className="absolute inset-0 z-50 bg-slate-950 text-white"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      <motion.div
+                        className="absolute inset-0"
+                        animate={
+                          reduceMotion
+                            ? undefined
+                            : {
+                                x: stress === 0 ? 0 : stress === 1 ? -2 : stress === 2 ? 2 : -1,
+                                filter: ["none", "contrast(1.25) saturate(1.4)", "none"]
+                              }
+                        }
+                        transition={{ duration: 0.25 }}
+                      />
 
-                {status === "Screenshot taken" && screen === "thread" ? (
-                  <div className="absolute inset-x-0 bottom-[68px] z-30 px-4">
-                    <div className="rounded-3xl border border-amber-400/30 bg-amber-400/10 p-4 text-xs text-white/85">
-                      <div className="flex items-start gap-3">
-                        <Zap className="mt-0.5 h-4 w-4 text-amber-200" />
-                        <div>
-                          <div className="font-semibold text-white">Screenshot taken</div>
-                          <div className="mt-1 leading-relaxed text-white/70">
-                            Now it can be saved and shared again вЂ” without control.
+                      <div className="relative p-5">
+                        <div className="rounded-3xl border border-rose-500/25 bg-rose-500/10 p-5">
+                          <div className="inline-flex items-center gap-2 text-sm font-semibold">
+                            <Zap className="h-5 w-5 text-rose-200" />
+                            Varsler eksploderer
+                          </div>
+                          <div className="mt-2 text-xs leading-relaxed text-white/75">
+                            Nettkriminelle bruker ofte frykt og tidspress. Dette er en simulering.
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                ) : null}
+
+                      {/* flying thumbnails */}
+                      {!reduceMotion ? (
+                        <div className="pointer-events-none absolute inset-0">
+                          <AnimatePresence>
+                            {galleryFx.map((g) => (
+                              <motion.div
+                                key={g.id}
+                                className="absolute rounded-2xl bg-white/10 ring-1 ring-white/10"
+                                style={{
+                                  width: 64,
+                                  height: 64,
+                                  left: `${g.x * 100}%`,
+                                  top: `${g.y * 100}%`,
+                                  transform: "translate(-50%, -50%)"
+                                }}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{
+                                  opacity: [0, 1, 0],
+                                  scale: [0.9, 1, 0.85],
+                                  x: [0, g.d * 120],
+                                  y: [0, -140]
+                                }}
+                                transition={{ duration: 1.0 }}
+                              />
+                            ))}
+                          </AnimatePresence>
+                        </div>
+                      ) : null}
+
+                      {/* floaters */}
+                      {!reduceMotion ? (
+                        <div className="pointer-events-none absolute inset-0">
+                          <AnimatePresence>
+                            {floaters.map((f) => (
+                              <motion.div
+                                key={f.id}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.35 }}
+                                className="absolute text-xl"
+                                style={{
+                                  left: `${f.x * 100}%`,
+                                  top: `${f.y * 100}%`,
+                                  transform: "translate(-50%, -50%)"
+                                }}
+                              >
+                                {f.t}
+                              </motion.div>
+                            ))}
+                          </AnimatePresence>
+                        </div>
+                      ) : null}
+
+                      {/* toast stack */}
+                      <div className="absolute inset-x-0 top-[140px] z-20 px-4">
+                        <div className="space-y-2">
+                          <AnimatePresence initial={false}>
+                            {toasts.map((t) => (
+                              <Toast key={t.id} text={t.text} tone={t.tone} />
+                            ))}
+                          </AnimatePresence>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+
+                {/* Positive outcome */}
+                <AnimatePresence>
+                  {phase === "deny_good" ? (
+                    <motion.div
+                      className="absolute inset-0 z-50 grid place-items-center bg-white p-6"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      <div className="w-full max-w-[420px] rounded-3xl border border-black/5 bg-white p-6 shadow-sm">
+                        <div className="flex items-start gap-3">
+                          <ShieldCheck className="mt-0.5 h-6 w-6 text-emerald-600" />
+                          <div>
+                            <div className="text-lg font-semibold text-slate-900">Bra valg.</div>
+                            <div className="mt-1 text-sm leading-relaxed text-slate-700">
+                              Du unngikk en phishing‑felle. Dette er typisk: panikkmelding + ukjent lenke + krav om
+                              tilgang.
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                          <div className="rounded-2xl border border-black/5 bg-slate-50 p-4 text-sm text-slate-700">
+                            <div className="font-semibold text-slate-900">Sjekk URL</div>
+                            <div className="mt-1">
+                              Se etter rare domener, ekstra ord, og sider du ikke kjenner.
+                            </div>
+                          </div>
+                          <div className="rounded-2xl border border-black/5 bg-slate-50 p-4 text-sm text-slate-700">
+                            <div className="font-semibold text-slate-900">Ikke stol på press</div>
+                            <div className="mt-1">
+                              “Haster!” er en klassisk metode for å få deg til å klikke uten å tenke.
+                            </div>
+                          </div>
+                        </div>
+                        <div className="mt-5 flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={tryAgain}
+                            className="rounded-full bg-blue-700 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800"
+                          >
+                            Try Again
+                          </button>
+                          <button
+                            type="button"
+                            onClick={goProtection}
+                            className="rounded-full border border-black/5 bg-white px-5 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-50"
+                          >
+                            Hvordan beskytte deg
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+
+                {/* Learn screen */}
+                <AnimatePresence>
+                  {phase === "learn" ? (
+                    <motion.div
+                      className="absolute inset-0 z-50 grid place-items-center bg-slate-950 p-6 text-white"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      <div className="w-full max-w-[520px] rounded-3xl border border-white/10 bg-white/5 p-6">
+                        <div className="flex items-start gap-3">
+                          <Zap className="mt-0.5 h-6 w-6 text-rose-200" />
+                          <div>
+                            <div className="text-xl font-semibold">
+                              Slik kan phishing og falske lenker føre til sextortion.
+                            </div>
+                            <div className="mt-2 text-sm leading-relaxed text-white/75">
+                              Dette er en simulering. Den viser hvordan press og “tillatelse”-popups kan misbrukes
+                              for å skape frykt og få penger eller flere bilder.
+                            </div>
+                          </div>
+                        </div>
+
+                        <ul className="mt-5 space-y-3 text-sm text-white/80">
+                          {[
+                            "Falske lenker kan lure folk til å gi tilgang til bilder og personlig informasjon.",
+                            "Nettkriminelle bruker ofte frykt og press for å få penger eller flere bilder.",
+                            "Del aldri sensitiv informasjon gjennom ukjente lenker.",
+                            "Gi ikke tilgang til bilder eller kamera uten å være sikker på appen/nettsiden.",
+                            "Snakk med en trygg voksen eller kontakt politiet hvis dette skjer."
+                          ].map((t) => (
+                            <li key={t} className="flex gap-3">
+                              <span className="mt-1 h-2 w-2 rounded-full bg-sky-300" />
+                              <span className="leading-relaxed">{t}</span>
+                            </li>
+                          ))}
+                        </ul>
+
+                        <div className="mt-6 flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={tryAgain}
+                            className="rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-500"
+                          >
+                            Try Again
+                          </button>
+                          <button
+                            type="button"
+                            onClick={goProtection}
+                            className="rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white hover:bg-white/10"
+                          >
+                            Hvordan beskytte deg
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
               </PhoneFrame>
             </div>
           </motion.div>
@@ -1038,5 +1085,3 @@ export default function PhoneGame({
     </section>
   );
 }
-
-
