@@ -120,7 +120,7 @@ function SafetyMeter({ value }: { value: number }) {
         <div className={`h-full ${tone}`} style={{ width: `${pct}%` }} />
       </div>
       <div className="mt-2 text-[11px] text-slate-600">
-        HГёyere er bedre. Klikk og tillatelser kan pГҐvirke tryggheten.
+        Høyere er bedre. Klikk og tillatelser kan påvirke tryggheten.
       </div>
     </div>
   );
@@ -225,7 +225,7 @@ function MessageBubble({
               </div>
               <div className="h-28 w-full bg-gradient-to-br from-slate-200 to-slate-100 blur-[2px]" />
               <div className="border-t border-black/5 bg-white px-3 py-2 text-[12px] text-slate-600">
-                Trykk В«Г…pneВ» for ГҐ se
+                Trykk «Åpne» for å se
               </div>
             </div>
 
@@ -242,7 +242,7 @@ function MessageBubble({
                 onClick={onOpenSnap}
                 className="rounded-2xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-500"
               >
-                Г…pne
+                Åpne
               </button>
             </div>
           </div>
@@ -250,7 +250,7 @@ function MessageBubble({
           <div className="rounded-3xl border border-rose-500/20 bg-rose-500/5 p-4">
             <div className="text-sm font-semibold text-slate-900">{label}</div>
             <div className="mt-2 text-[15px] leading-relaxed text-slate-900">
-              Vi har bildene dine nГҐ рџ™‚
+              Vi har bildene dine nå 🙂
             </div>
             <div className="mt-3 grid grid-cols-3 gap-2">
               {Array.from({ length: msg.count }).map((_, idx) => (
@@ -323,7 +323,7 @@ function FakeSite({
         <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
           <div className="text-sm font-semibold">Se story</div>
           <div className="mt-2 text-xs leading-relaxed text-white/70">
-            Denne siden ser вЂњekteвЂќ ut, men URL-en er ukjent og ber om tilgang. VГ¦r alltid skeptisk til lenker.
+            Denne siden ser “ekte” ut, men URL-en er ukjent og ber om tilgang. Vær alltid skeptisk til lenker.
           </div>
 
           <div className="mt-4 overflow-hidden rounded-2xl ring-1 ring-white/10">
@@ -338,7 +338,7 @@ function FakeSite({
             onClick={onRequestPhotos}
             className="mt-5 w-full rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-500"
           >
-            Г…pne
+            Åpne
           </button>
         </div>
       </div>
@@ -528,7 +528,7 @@ export default function PhoneGame({
     const attackerLabel = "Ukjent";
     const t1 = window.setTimeout(() => {
       setTyping(false);
-      pushMsg({ id: uid(), kind: "text", side: "attacker", text: "Vi har alle bildene dine nГҐ рџ™‚" });
+      pushMsg({ id: uid(), kind: "text", side: "attacker", text: "Vi har alle bildene dine nå 🙂" });
       play("/sfx/warning.mp3", 0.55);
     }, 650);
 
@@ -615,9 +615,9 @@ export default function PhoneGame({
 
   const inboxNames = useMemo(
     () => [
-      { name: "Maja", sub: "Mottatt вЂў 8 t" },
-      { name: "Noah", sub: "Mottatt вЂў 1 m" },
-      { name: "Linnea", sub: "Г…pnet вЂў 2 t" }
+      { name: "Maja", sub: "Mottatt • 8 t" },
+      { name: "Noah", sub: "Mottatt • 1 m" },
+      { name: "Linnea", sub: "Åpnet • 2 t" }
     ],
     []
   );
@@ -627,9 +627,9 @@ export default function PhoneGame({
       <Container>
         <div className="py-12 sm:py-14">
           <SectionTitle
-            eyebrow="MiniвЂ‘spill"
+            eyebrow="Mini‑spill"
             title="Digital safety: phishing og sextortion"
-            description="Dette er en educational awareness-opplevelse. Den viser risiko ved falske lenker og press/utpressing, uten ГҐ lГ¦re bort hacking."
+            description="Dette er en educational awareness-opplevelse. Den viser risiko ved falske lenker og press/utpressing, uten å lære bort hacking."
           />
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -695,7 +695,7 @@ export default function PhoneGame({
                         <button
                           type="button"
                           className="grid h-10 w-10 place-items-center rounded-full bg-slate-100 hover:bg-slate-200"
-                          aria-label="SГёk"
+                          aria-label="Søk"
                         >
                           <Search className="h-5 w-5" />
                         </button>
@@ -724,7 +724,7 @@ export default function PhoneGame({
                           <div className="min-w-0">
                             <div className="truncate text-base font-semibold">{friendName}</div>
                             <div className="mt-0.5 text-[11px] text-slate-500">
-                              {typing ? "skriverвЂ¦" : "i dag"}
+                              {typing ? "skriver…" : "i dag"}
                             </div>
                           </div>
                         </div>
@@ -751,7 +751,7 @@ export default function PhoneGame({
                   <div className="absolute inset-0 bg-white pt-[200px]">
                     <div className="sticky top-[200px] z-0 px-4 pb-3">
                       <div className="flex gap-6 overflow-auto text-sm font-semibold text-slate-700">
-                        {["NГ¦r meg", "Samtaler", "Grupper", "Svar", "Bestevenner"].map((t) => (
+                        {["Nær meg", "Samtaler", "Grupper", "Svar", "Bestevenner"].map((t) => (
                           <div key={t} className="whitespace-nowrap">
                             {t}
                           </div>
@@ -791,7 +791,7 @@ export default function PhoneGame({
                             <span className="h-2 w-2 rounded-full bg-rose-500" />
                           </div>
                           <div className="mt-0.5 truncate text-[12px] text-slate-600">
-                            Nytt snap вЂў nГҐ
+                            Nytt snap • nå
                           </div>
                         </div>
                         <div className="text-[12px] font-semibold text-rose-600">New</div>
@@ -803,7 +803,7 @@ export default function PhoneGame({
                 {screen === "thread" ? (
                   <>
                     <div className="absolute inset-x-0 top-[200px] border-b border-black/5 bg-slate-50 px-4 py-2 text-[12px] text-slate-600">
-                      Ikke gГҐ glipp av chats fra {friendName}!{" "}
+                      Ikke gå glipp av chats fra {friendName}!{" "}
                       <span className="font-semibold text-blue-700">Aktiver varsler</span>
                     </div>
 
@@ -881,7 +881,7 @@ export default function PhoneGame({
                           <div>
                             <div className="text-sm font-semibold">Allow access to photos?</div>
                             <div className="mt-1 text-xs leading-relaxed text-white/70">
-                              Ukjent side ber om tilgang til bildene dine. Dette kan vГ¦re phishing.
+                              Ukjent side ber om tilgang til bildene dine. Dette kan være phishing.
                             </div>
                           </div>
                         </div>
@@ -916,9 +916,9 @@ export default function PhoneGame({
                       exit={{ opacity: 0 }}
                     >
                       <div className="w-full max-w-[320px] rounded-3xl border border-white/10 bg-white/5 p-6 text-center">
-                        <div className="text-sm font-semibold">LasterвЂ¦</div>
+                        <div className="text-sm font-semibold">Laster…</div>
                         <div className="mt-2 text-xs text-white/70">
-                          Dette er hvordan falske sider kan fГёles вЂњnormaleвЂќ.
+                          Dette er hvordan falske sider kan føles “normale”.
                         </div>
                         <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-white/10">
                           <motion.div
@@ -1038,7 +1038,7 @@ export default function PhoneGame({
                           <div>
                             <div className="text-lg font-semibold text-slate-900">Bra valg.</div>
                             <div className="mt-1 text-sm leading-relaxed text-slate-700">
-                              Du unngikk en phishingвЂ‘felle. Dette er typisk: panikkmelding + ukjent lenke + krav om
+                              Du unngikk en phishing‑felle. Dette er typisk: panikkmelding + ukjent lenke + krav om
                               tilgang.
                             </div>
                           </div>
@@ -1051,9 +1051,9 @@ export default function PhoneGame({
                             </div>
                           </div>
                           <div className="rounded-2xl border border-black/5 bg-slate-50 p-4 text-sm text-slate-700">
-                            <div className="font-semibold text-slate-900">Ikke stol pГҐ press</div>
+                            <div className="font-semibold text-slate-900">Ikke stol på press</div>
                             <div className="mt-1">
-                              вЂњHaster!вЂќ er en klassisk metode for ГҐ fГҐ deg til ГҐ klikke uten ГҐ tenke.
+                              “Haster!” er en klassisk metode for å få deg til å klikke uten å tenke.
                             </div>
                           </div>
                         </div>
@@ -1092,21 +1092,21 @@ export default function PhoneGame({
                           <Zap className="mt-0.5 h-6 w-6 text-rose-200" />
                           <div>
                             <div className="text-xl font-semibold">
-                              Slik kan phishing og falske lenker fГёre til sextortion.
+                              Slik kan phishing og falske lenker føre til sextortion.
                             </div>
                             <div className="mt-2 text-sm leading-relaxed text-white/75">
-                              Dette er en simulering. Den viser hvordan press og вЂњtillatelseвЂќ-popups kan misbrukes
-                              for ГҐ skape frykt og fГҐ penger eller flere bilder.
+                              Dette er en simulering. Den viser hvordan press og “tillatelse”-popups kan misbrukes
+                              for å skape frykt og få penger eller flere bilder.
                             </div>
                           </div>
                         </div>
 
                         <ul className="mt-5 space-y-3 text-sm text-white/80">
                           {[
-                            "Falske lenker kan lure folk til ГҐ gi tilgang til bilder og personlig informasjon.",
-                            "Nettkriminelle bruker ofte frykt og press for ГҐ fГҐ penger eller flere bilder.",
+                            "Falske lenker kan lure folk til å gi tilgang til bilder og personlig informasjon.",
+                            "Nettkriminelle bruker ofte frykt og press for å få penger eller flere bilder.",
                             "Del aldri sensitiv informasjon gjennom ukjente lenker.",
-                            "Gi ikke tilgang til bilder eller kamera uten ГҐ vГ¦re sikker pГҐ appen/nettsiden.",
+                            "Gi ikke tilgang til bilder eller kamera uten å være sikker på appen/nettsiden.",
                             "Snakk med en trygg voksen eller kontakt politiet hvis dette skjer."
                           ].map((t) => (
                             <li key={t} className="flex gap-3">

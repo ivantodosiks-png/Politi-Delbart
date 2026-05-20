@@ -36,7 +36,7 @@ export default function HelpSection() {
           <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
             <SectionTitle
               eyebrow="Hjelp og kontakt"
-              title="Hva gjør du hvis et bilde deles uten samtykke?"
+              title="Hva gjør du hvis du blir lurt eller presset?"
               description="Dette er en generell veiledning. Ved akutt fare: ring 112."
             />
 
@@ -60,8 +60,8 @@ export default function HelpSection() {
               </div>
 
               <div className="mt-4 text-sm text-slate-700">
-                Hvis du ikke vil ringe: snakk med en trygg voksen eller bruk lokale hjelpe- og
-                støttetjenester (skole, helsestasjon, rådgiver).
+                Hvis du ikke vil ringe: snakk med en trygg voksen eller bruk lokale hjelpe- og støttetjenester
+                (skole, helsestasjon, rådgiver).
               </div>
             </div>
           </div>
@@ -81,6 +81,28 @@ export default function HelpSection() {
                 <div className="mt-2 text-sm leading-relaxed text-slate-700">{s.text}</div>
               </motion.div>
             ))}
+          </div>
+
+          <div className="mt-10 grid gap-4 md:grid-cols-2">
+            <div className="rounded-sm border border-slate-200 bg-slate-50 p-6 text-sm text-slate-700">
+              <div className="font-semibold text-slate-900">Hvis noen prøver sextortion</div>
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                <li>Ikke betal. Ikke send flere bilder.</li>
+                <li>Ta skjermbilder og lagre bevis (brukernavn, lenker, tidspunkt).</li>
+                <li>Blokker kontoen og rapporter i appen.</li>
+                <li>Snakk med en trygg voksen eller kontakt politiet.</li>
+              </ul>
+            </div>
+
+            <div className="rounded-sm border border-slate-200 bg-slate-50 p-6 text-sm text-slate-700">
+              <div className="font-semibold text-slate-900">Slik beskytter du deg</div>
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                <li>Bruk 2FA på e‑post og sosiale medier.</li>
+                <li>Oppdater telefon og apper.</li>
+                <li>Vær skeptisk til lenker fra meldinger.</li>
+                <li>Gi færrest mulig tillatelser.</li>
+              </ul>
+            </div>
           </div>
         </div>
       </Container>

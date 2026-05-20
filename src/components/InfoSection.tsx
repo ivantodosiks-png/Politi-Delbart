@@ -1,7 +1,7 @@
 import SectionTitle from "./SectionTitle";
 import Container from "./Container";
 import { motion, useReducedMotion } from "framer-motion";
-import { Ban, FileWarning, ShieldCheck, Scale } from "lucide-react";
+import { Ban, FileWarning, Link2, ShieldCheck, TriangleAlert } from "lucide-react";
 
 const points = [
   {
@@ -10,19 +10,24 @@ const points = [
     text: "Å dele intime bilder uten samtykke kan være straffbart — selv om du «bare sender til en venn»."
   },
   {
-    icon: ShieldCheck,
-    title: "Stopp før du trykker",
-    text: "Hvis du er i tvil: stopp. Tenk på konsekvensene for den som blir rammet."
+    icon: Link2,
+    title: "Falske lenker (phishing)",
+    text: "Lenker kan se «normale» ut, men lede til falske sider som prøver å få deg til å gi fra deg informasjon eller tillatelser."
   },
   {
     icon: FileWarning,
-    title: "Ta vare på bevis",
-    text: "Skjermbilder, lenker og tidspunkt kan være viktig for å stoppe spredning og etterforske."
+    title: "Tillatelser og tilgang",
+    text: "Gi ikke tilgang til bilder/kamera uten at du er helt sikker på appen/nettsiden. Spør en voksen hvis du er i tvil."
   },
   {
-    icon: Scale,
-    title: "Rettigheter og støtte",
-    text: "Du kan få hjelp til å rapportere, få innhold fjernet og få støtte hvis du er utsatt."
+    icon: ShieldCheck,
+    title: "Slik gjør du det tryggere",
+    text: "Sjekk URL, tenk før du klikker, bruk sterke passord og totrinnsbekreftelse (2FA) på viktige kontoer."
+  },
+  {
+    icon: TriangleAlert,
+    title: "Sextortion (utpressing)",
+    text: "Nettkriminelle bruker frykt og press: «betal ellers…». Ikke betal, ta vare på bevis og søk hjelp."
   }
 ];
 
@@ -34,12 +39,12 @@ export default function InfoSection() {
       <Container>
         <div className="py-12 sm:py-14">
           <SectionTitle
-            eyebrow="Kampanje"
-            title="Én klikk kan endre alt"
-            description="Deling av intime bilder uten samtykke kan få alvorlige konsekvenser. Her er en kort oversikt over hva du kan gjøre — og hvorfor det betyr noe."
+            eyebrow="Digital trygghet"
+            title="Hva handler dette om?"
+            description="Dette er en kort guide til falske lenker (phishing), tillatelser til bilder og sextortion. Målet er å hjelpe deg å ta tryggere valg."
           />
 
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {points.map((p, idx) => (
               <motion.div
                 key={p.title}
@@ -55,8 +60,19 @@ export default function InfoSection() {
               </motion.div>
             ))}
           </div>
+
+          <div className="mt-10 rounded-sm border border-slate-200 bg-slate-50 p-6 text-sm text-slate-700">
+            <div className="font-semibold text-slate-900">Røde flagg du bør reagere på</div>
+            <ul className="mt-2 list-disc space-y-1 pl-5">
+              <li>«Haster!!!» eller «ER DETTE DEG!?» som presser deg til å klikke.</li>
+              <li>Ukjente domener som ligner på kjente tjenester.</li>
+              <li>Popups som ber om tilgang til bilder/kamera uten god forklaring.</li>
+              <li>Trusler, skam eller krav om penger.</li>
+            </ul>
+          </div>
         </div>
       </Container>
     </section>
   );
 }
+
