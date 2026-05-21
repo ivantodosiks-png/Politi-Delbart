@@ -3,8 +3,10 @@ import SectionTitle from "./SectionTitle";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   Camera,
+  CheckCircle2,
   ChevronLeft,
   CircleAlert,
+  XCircle,
   Image as ImageIcon,
   Link as LinkIcon,
   Lock,
@@ -26,6 +28,7 @@ type Phase =
   | "allow_loading"
   | "sextortion_chat"
   | "friend_angry"
+  | "verdict"
   | "learn_bad"
   | "learn_good";
 type LearnOutcome = "bad" | "good" | "ignored";
@@ -330,6 +333,75 @@ function InputBar({ disabled }: { disabled: boolean }) {
         <Send className="h-5 w-5" />
       </button>
     </div>
+  );
+}
+
+function VerdictScreen({
+  outcome,
+  reduceMotion,
+  onContinue
+}: {
+  outcome: LearnOutcome;
+  reduceMotion: boolean | null;
+  onContinue: () => void;
+}) {
+  const isBad = outcome === "bad";
+
+  const title = isBad
+    ? "Ikke et trygt valg"
+    : outcome === "good"
+      ? "Godt valg!"
+      : "Smart valg!";
+
+  const summary = isBad
+    ? "Du ga tilgang til bilder på en ukjent side. I chatten kom trusler og press – slik starter mange saker med utpressing."
+    : outcome === "good"
+      ? "Du sa nei til tilgang. Vennen ble sint – det kan være manipulering. Du stoppet det før det ble verre."
+      : "Du åpnet ikke den mistenkelige lenken. Det er ofte det tryggeste du kan gjøre.";
+
+  return (
+    <motion.div
+      className={[
+        "absolute inset-0 z-[60] flex flex-col items-center justify-center px-6 text-center",
+        isBad
+          ? "bg-gradient-to-b from-rose-600/95 via-rose-950 to-slate-950 text-white"
+          : "bg-gradient-to-b from-emerald-600/90 via-slate-900 to-slate-950 text-white"
+      ].join(" ")}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: reduceMotion ? 0.15 : 0.35 }}
+    >
+      <motion.div
+        initial={reduceMotion ? false : { opacity: 0, scale: 0.92, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.05 }}
+        className="w-full max-w-[340px]"
+      >
+        <div className="mx-auto grid h-16 w-16 place-items-center rounded-full bg-white/15 ring-1 ring-white/20">
+          {isBad ? (
+            <XCircle className="h-9 w-9 text-rose-100" />
+          ) : (
+            <CheckCircle2 className="h-9 w-9 text-emerald-100" />
+          )}
+        </div>
+
+        <p className="mt-5 text-xs font-semibold uppercase tracking-wider text-white/70">
+          {isBad ? "Resultat" : "Du gjorde det riktig"}
+        </p>
+        <h3 className="mt-2 text-2xl font-semibold leading-tight">{title}</h3>
+        <p className="mt-4 text-sm leading-relaxed text-white/85">{summary}</p>
+
+        <button
+          type="button"
+          onClick={onContinue}
+          className="mt-8 w-full rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-slate-900 shadow-lg hover:bg-white/95"
+        >
+          Fortsett
+        </button>
+        <p className="mt-3 text-[11px] text-white/55">Trykk for å se hva som skjedde og hva du kan gjøre</p>
+      </motion.div>
+    </motion.div>
   );
 }
 
@@ -701,7 +773,8 @@ export default function PhoneGame({
       });
       window.setTimeout(() => {
         setLearnOutcome("ignored");
-        setPhase("learn_good");
+        setTyping(false);
+        setPhase("verdict");
       }, 1400);
     }, 900);
   }
@@ -779,7 +852,8 @@ export default function PhoneGame({
 
     const t6 = window.setTimeout(() => {
       setLearnOutcome("good");
-      setPhase("learn_good");
+      setTyping(false);
+      setPhase("verdict");
     }, 4800);
 
     return () => {
@@ -871,8 +945,9 @@ export default function PhoneGame({
       play("/sfx/warning.mp3", 0.55);
       window.setTimeout(() => {
         setLearnOutcome("bad");
-        setPhase("learn_bad");
-      }, reduceMotion ? 500 : 2200);
+        setTyping(false);
+        setPhase("verdict");
+      }, reduceMotion ? 400 : 800);
     }, 4500);
 
     return () => {
@@ -890,6 +965,10 @@ export default function PhoneGame({
   function tryAgain() {
     resetScenario();
     openThread();
+  }
+
+  function continueToResult() {
+    setPhase(learnOutcome === "bad" ? "learn_bad" : "learn_good");
   }
 
   function goProtection() {
@@ -1093,7 +1172,7 @@ export default function PhoneGame({
                   </div>
                 ) : null}
 
-                {screen === "thread" ? (
+                {screen === "thread" && phase !== "verdict" && phase !== "learn_bad" && phase !== "learn_good" ? (
                   <>
                     {chatPartner === "friend" && phase === "act1" ? (
                       <div className="absolute inset-x-0 top-[200px] border-b border-black/5 bg-slate-50 px-4 py-2 text-[12px] text-slate-600">
@@ -1326,7 +1405,18 @@ export default function PhoneGame({
                   ) : null}
                 </AnimatePresence>
 
-                {/* Fullskjerm forklaring */}
+                {/* Verdict – chat skjules, bruker trykker Fortsett */}
+                <AnimatePresence>
+                  {phase === "verdict" ? (
+                    <VerdictScreen
+                      outcome={learnOutcome}
+                      reduceMotion={reduceMotion}
+                      onContinue={continueToResult}
+                    />
+                  ) : null}
+                </AnimatePresence>
+
+                {/* Fullskjerm forklaring (resultatside) */}
                 <AnimatePresence>
                   {phase === "learn_bad" || phase === "learn_good" ? (
                     <ExplainScreen
