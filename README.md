@@ -1,4 +1,4 @@
-# Politiet – «Én klikk kan endre alt» (Delbart)
+# Politiet – «Ett klikk kan endre alt» (Delbart)
 
 React + Vite + Tailwind CSS + Framer Motion + Lucide.
 
