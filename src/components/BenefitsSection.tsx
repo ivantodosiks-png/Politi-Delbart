@@ -42,7 +42,12 @@ export default function BenefitsSection() {
                 whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-120px" }}
                 transition={{ duration: 0.5, delay: idx * 0.03 }}
-                className="rounded-sm border border-slate-200 bg-white p-5"
+                whileHover={
+                  reduceMotion
+                    ? undefined
+                    : { y: -3, transition: { duration: 0.2 } }
+                }
+                className="rounded-sm border border-slate-200 bg-white p-5 transition-shadow hover:border-blue-200 hover:shadow-md"
               >
                 <div className="text-sm font-semibold text-slate-900">{b.title}</div>
                 <div className="mt-2 text-sm leading-relaxed text-slate-700">{b.text}</div>

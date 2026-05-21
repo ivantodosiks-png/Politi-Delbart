@@ -57,7 +57,12 @@ export default function RiskCards() {
                 whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-120px" }}
                 transition={{ duration: 0.5, delay: idx * 0.03 }}
-                className="rounded-sm border border-slate-200 bg-white p-6"
+                whileHover={
+                  reduceMotion
+                    ? undefined
+                    : { y: -3, transition: { duration: 0.2 } }
+                }
+                className="rounded-sm border border-slate-200 bg-white p-6 transition-shadow hover:border-blue-200 hover:shadow-md"
               >
                 <div className="flex items-start gap-4">
                   <div className="grid h-10 w-10 place-items-center rounded-sm bg-blue-50 text-blue-700">

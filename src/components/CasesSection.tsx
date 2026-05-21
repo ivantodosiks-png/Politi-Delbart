@@ -1,5 +1,6 @@
 import Container from "./Container";
 import SectionTitle from "./SectionTitle";
+import FadeIn from "./motion/FadeIn";
 import { motion, useReducedMotion } from "framer-motion";
 
 const cases = [
@@ -34,7 +35,12 @@ export default function CasesSection() {
                 whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-120px" }}
                 transition={{ duration: 0.5, delay: idx * 0.03 }}
-                className="rounded-sm border border-slate-200 bg-white p-6"
+                whileHover={
+                  reduceMotion
+                    ? undefined
+                    : { y: -3, transition: { duration: 0.2 } }
+                }
+                className="rounded-sm border border-slate-200 bg-white p-6 transition-shadow hover:border-blue-200 hover:shadow-md"
               >
                 <div className="text-base font-semibold text-slate-900">{c.title}</div>
                 <div className="mt-2 text-sm leading-relaxed text-slate-700">{c.text}</div>
@@ -42,7 +48,7 @@ export default function CasesSection() {
             ))}
           </div>
 
-          <blockquote className="mt-10 rounded-sm border border-slate-200 bg-slate-50 p-6 text-sm text-slate-700">
+          <FadeIn className="mt-10 rounded-sm border border-slate-200 bg-slate-50 p-6 text-sm text-slate-700">
             <p className="leading-relaxed italic">
               «Mange saker starter med ett klikk og skam. Jo tidligere vi får melding, jo bedre kan
               vi begrense skaden.»
@@ -50,7 +56,7 @@ export default function CasesSection() {
             <footer className="mt-3 text-xs font-semibold text-slate-900 not-italic">
               Etterforsker, nettkriminalitet
             </footer>
-          </blockquote>
+          </FadeIn>
         </div>
       </Container>
     </section>

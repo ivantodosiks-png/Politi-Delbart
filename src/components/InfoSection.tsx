@@ -1,5 +1,6 @@
 import SectionTitle from "./SectionTitle";
 import Container from "./Container";
+import FadeIn from "./motion/FadeIn";
 import { motion, useReducedMotion } from "framer-motion";
 import { Ban, FileWarning, Link2, ShieldCheck, TriangleAlert } from "lucide-react";
 
@@ -52,7 +53,12 @@ export default function InfoSection() {
                 whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-120px" }}
                 transition={{ duration: 0.5, delay: idx * 0.03 }}
-                className="rounded-sm border border-slate-200 bg-white p-5"
+                whileHover={
+                  reduceMotion
+                    ? undefined
+                    : { y: -3, transition: { duration: 0.2 } }
+                }
+                className="rounded-sm border border-slate-200 bg-white p-5 transition-shadow hover:border-blue-200 hover:shadow-md"
               >
                 <p.icon className="h-5 w-5 text-blue-700" />
                 <div className="mt-3 text-sm font-semibold text-slate-900">{p.title}</div>
@@ -61,7 +67,7 @@ export default function InfoSection() {
             ))}
           </div>
 
-          <div className="mt-10 rounded-sm border border-slate-200 bg-slate-50 p-6 text-sm text-slate-700">
+          <FadeIn className="mt-10 rounded-sm border border-slate-200 bg-slate-50 p-6 text-sm text-slate-700">
             <div className="font-semibold text-slate-900">Røde flagg – stopp før du klikker</div>
             <ul className="mt-2 list-disc space-y-1 pl-5">
               <li>Meldinger med panikk: «HASTER!!!», «ER DETTE DEG!?», «slett innen 10 min».</li>
@@ -74,7 +80,7 @@ export default function InfoSection() {
               </li>
               <li>Trusler, skam, krav om penger, Vipps eller «flere bilder hvis ikke…».</li>
             </ul>
-          </div>
+          </FadeIn>
         </div>
       </Container>
     </section>

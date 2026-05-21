@@ -1,9 +1,10 @@
 import Container from "./Container";
 import logoFooter from "../assets/logo-footer.png";
+import FadeIn from "./motion/FadeIn";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-slate-200 bg-white">
+    <FadeIn as="footer" className="border-t border-slate-200 bg-white">
       <Container>
         <div className="flex flex-col gap-6 py-10 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
@@ -15,7 +16,7 @@ export default function Footer() {
           </div>
 
           <div className="text-sm text-slate-700">
-            <a className="hover:underline" href="#help">
+            <a className="transition-colors hover:text-blue-700 hover:underline" href="#help">
               Hjelp og neste steg
             </a>
           </div>
@@ -26,6 +27,6 @@ export default function Footer() {
           erstatter ikke juridisk rådgivning.
         </div>
       </Container>
-    </footer>
+    </FadeIn>
   );
 }

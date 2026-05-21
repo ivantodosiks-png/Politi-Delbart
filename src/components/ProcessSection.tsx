@@ -1,5 +1,7 @@
 import Container from "./Container";
 import SectionTitle from "./SectionTitle";
+import StaggerGrid, { StaggerItem } from "./motion/StaggerGrid";
+import FadeIn from "./motion/FadeIn";
 
 const steps = [
   {
@@ -30,19 +32,22 @@ export default function ProcessSection() {
             description="Siden er bygget for å gi deg oversikt før du tar valg på ekte. Bruk den i den rekkefølgen som passer deg."
           />
 
-          <div className="mt-10 grid gap-4 sm:grid-cols-3">
+          <StaggerGrid className="mt-10 grid gap-4 sm:grid-cols-3">
             {steps.map((s) => (
-              <div key={s.n} className="rounded-sm border border-slate-200 bg-white p-5">
+              <StaggerItem
+                key={s.n}
+                className="h-full rounded-sm border border-slate-200 bg-white p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
+              >
                 <div className="text-xs font-semibold uppercase tracking-wider text-blue-700">
                   Steg {s.n}
                 </div>
                 <div className="mt-2 text-sm font-semibold text-slate-900">{s.title}</div>
                 <div className="mt-2 text-sm leading-relaxed text-slate-700">{s.text}</div>
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerGrid>
 
-          <div className="mt-10 rounded-sm border border-slate-200 bg-slate-50 p-6 text-sm text-slate-700">
+          <FadeIn className="mt-10 rounded-sm border border-slate-200 bg-slate-50 p-6 text-sm text-slate-700">
             <div className="font-semibold text-slate-900">For hvem er dette?</div>
             <ul className="mt-2 list-disc space-y-1 pl-5">
               <li>
@@ -58,7 +63,7 @@ export default function ProcessSection() {
                 kompetanse.
               </li>
             </ul>
-          </div>
+          </FadeIn>
         </div>
       </Container>
     </section>

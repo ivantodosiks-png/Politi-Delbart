@@ -76,7 +76,12 @@ export default function HelpSection() {
                 whileInView={reduceMotion ? undefined : { opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-120px" }}
                 transition={{ duration: 0.5, delay: idx * 0.03 }}
-                className="rounded-sm border border-slate-200 bg-white p-5"
+                whileHover={
+                  reduceMotion
+                    ? undefined
+                    : { y: -3, transition: { duration: 0.2 } }
+                }
+                className="rounded-sm border border-slate-200 bg-white p-5 transition-shadow hover:border-blue-200 hover:shadow-md"
               >
                 <s.icon className="h-5 w-5 text-blue-700" />
                 <div className="mt-3 text-sm font-semibold text-slate-900">{s.title}</div>
