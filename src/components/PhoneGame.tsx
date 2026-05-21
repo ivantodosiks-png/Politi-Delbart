@@ -43,6 +43,15 @@ type ChatMessage =
       side: "friend";
       title: string;
       urlText: string;
+      interactive?: boolean;
+    }
+  | {
+      id: string;
+      kind: "snap_confirm";
+      side: "friend";
+      title: string;
+      urlText: string;
+      answered?: boolean;
     }
   | {
       id: string;
@@ -177,7 +186,8 @@ function MessageBubble({
   attackerSeed,
   snapLocked,
   onOpenSnap,
-  onIgnoreSnap
+  onIgnoreSnap,
+  onIgnoreSnapConfirm
 }: {
   msg: ChatMessage;
   friendLabel: string;
@@ -187,6 +197,7 @@ function MessageBubble({
   snapLocked: boolean;
   onOpenSnap: () => void;
   onIgnoreSnap: () => void;
+  onIgnoreSnapConfirm: () => void;
 }) {
   if (msg.kind === "status") {
     return (
@@ -218,9 +229,19 @@ function MessageBubble({
           isLeft ? "bg-transparent" : "bg-slate-100 text-slate-900 ring-1 ring-black/5"
         ].join(" ")}
       >
-        {msg.kind === "snap" ? (
-          <div className="rounded-3xl border border-black/5 bg-white p-4 shadow-sm">
+        {msg.kind === "snap" || msg.kind === "snap_confirm" ? (
+          <div
+            className={[
+              "rounded-3xl border bg-white p-4 shadow-sm",
+              msg.kind === "snap_confirm" ? "border-amber-200 ring-1 ring-amber-100" : "border-black/5"
+            ].join(" ")}
+          >
             <div className="text-sm font-semibold text-slate-900">{label}</div>
+            {msg.kind === "snap_confirm" ? (
+              <p className="mt-2 text-[13px] font-medium text-amber-800">
+                Er du sikker på at du vil ignorere?
+              </p>
+            ) : null}
             <div className="mt-2 whitespace-pre-line text-[15px] leading-relaxed text-slate-900">
               {msg.title}
             </div>
@@ -242,13 +263,17 @@ function MessageBubble({
               </div>
             </div>
 
-            {snapLocked ? (
+            {msg.kind === "snap" && snapLocked ? (
               <div className="mt-3 text-center text-[12px] font-medium text-slate-500">Lenke åpnet</div>
+            ) : msg.kind === "snap" && msg.interactive === false ? (
+              <div className="mt-3 text-center text-[12px] font-medium text-slate-500">Ignorert</div>
+            ) : msg.kind === "snap_confirm" && msg.answered ? (
+              <div className="mt-3 text-center text-[12px] font-medium text-slate-500">Ignorert</div>
             ) : (
               <div className="mt-3 grid grid-cols-2 gap-2">
                 <button
                   type="button"
-                  onClick={onIgnoreSnap}
+                  onClick={msg.kind === "snap_confirm" ? onIgnoreSnapConfirm : onIgnoreSnap}
                   className="rounded-2xl border border-black/5 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 hover:bg-slate-50"
                 >
                   Ignorer
@@ -703,6 +728,18 @@ export default function PhoneGame({
     setMessages((prev) => [...prev, msg]);
   }
 
+  function lockSnapMessages() {
+    setMessages((prev) =>
+      prev.map((m) => (m.kind === "snap" ? { ...m, interactive: false } : m))
+    );
+  }
+
+  function lockConfirmSnap() {
+    setMessages((prev) =>
+      prev.map((m) => (m.kind === "snap_confirm" ? { ...m, answered: true } : m))
+    );
+  }
+
   function openThread() {
     setScreen("thread");
     setPhase("act1");
@@ -716,7 +753,8 @@ export default function PhoneGame({
         kind: "snap",
         side: "friend",
         title: "BRO ER DETTE DEG!!!?? 😭💀\nSjekk denne…",
-        urlText: "snap-profile-story.net"
+        urlText: "snap-profile-story.net",
+        interactive: true
       }
     ]);
     play("/sfx/notification.mp3", 0.45);
@@ -737,6 +775,7 @@ export default function PhoneGame({
     if (!open) return;
     if (screen !== "thread") return;
     if (phase !== "act1") return;
+    if (messages.some((m) => m.kind === "snap_confirm")) return;
 
     setTyping(true);
     const t1 = window.setTimeout(() => setTyping(false), 900);
@@ -748,10 +787,13 @@ export default function PhoneGame({
       window.clearTimeout(t1);
       window.clearTimeout(t2);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, phase, play, screen]);
 
   function openSnapFlow() {
     setSnapLocked(true);
+    lockSnapMessages();
+    lockConfirmSnap();
     setSafety((s) => Math.max(10, s - 12));
     pushMsg({ id: uid(), kind: "text", side: "me", text: "Åpner lenken…" });
     setScreen("fake_site");
@@ -759,9 +801,8 @@ export default function PhoneGame({
   }
 
   function ignoreSnapFlow() {
-    setSnapLocked(true);
-    setSafety((s) => Math.min(100, s + 8));
-    play("/sfx/success.mp3", 0.5);
+    setSafety((s) => Math.min(100, s + 4));
+    lockSnapMessages();
     pushMsg({ id: uid(), kind: "text", side: "me", text: "Nei, jeg åpner ikke den." });
     setTyping(true);
     window.setTimeout(() => {
@@ -773,11 +814,35 @@ export default function PhoneGame({
         text: "Hæ?? Det tar 2 sek. Tro meg da 🙄"
       });
       window.setTimeout(() => {
-        setLearnOutcome("ignored");
+        setTyping(true);
+      }, 600);
+      window.setTimeout(() => {
         setTyping(false);
-        setPhase("chat_await_continue");
+        pushMsg({
+          id: uid(),
+          kind: "text",
+          side: "friend",
+          text: "Seriøst – du må bare sjekke. Er du sikker på at du vil ignorere?"
+        });
+        pushMsg({
+          id: uid(),
+          kind: "snap_confirm",
+          side: "friend",
+          title: "BRO ER DETTE DEG!!!?? 😭💀\nSjekk denne…",
+          urlText: "snap-profile-story.net"
+        });
+        play("/sfx/notification.mp3", 0.4);
       }, 1400);
-    }, 900);
+    }, 800);
+  }
+
+  function ignoreSnapConfirm() {
+    setSafety((s) => Math.min(100, s + 6));
+    lockConfirmSnap();
+    play("/sfx/success.mp3", 0.45);
+    pushMsg({ id: uid(), kind: "text", side: "me", text: "Ja. Jeg ignorerer." });
+    setLearnOutcome("good");
+    setPhase("friend_angry");
   }
 
   function requestPhotosPopup() {
@@ -1198,6 +1263,7 @@ export default function PhoneGame({
                                   snapLocked={snapLocked}
                                   onOpenSnap={openSnapFlow}
                                   onIgnoreSnap={ignoreSnapFlow}
+                                  onIgnoreSnapConfirm={ignoreSnapConfirm}
                                 />
                               </motion.div>
                             ))}
