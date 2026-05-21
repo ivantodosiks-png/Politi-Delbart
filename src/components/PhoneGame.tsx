@@ -3,7 +3,6 @@ import SectionTitle from "./SectionTitle";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   Camera,
-  CheckCircle2,
   ChevronLeft,
   CircleAlert,
   Image as ImageIcon,
@@ -12,12 +11,10 @@ import {
   Search,
   Send,
   Shield,
-  ShieldCheck,
   Sparkles,
   TriangleAlert,
   Users,
-  X,
-  Zap
+  X
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -28,8 +25,10 @@ type Phase =
   | "popup"
   | "allow_loading"
   | "sextortion_chat"
-  | "deny_good"
-  | "learn";
+  | "friend_angry"
+  | "learn_bad"
+  | "learn_good";
+type LearnOutcome = "bad" | "good" | "ignored";
 type Side = "friend" | "attacker" | "me" | "system";
 
 type ChatMessage =
@@ -41,7 +40,14 @@ type ChatMessage =
       title: string;
       urlText: string;
     }
-  | { id: string; kind: "gallery"; side: "attacker"; count: number }
+  | {
+      id: string;
+      kind: "gallery";
+      side: "attacker";
+      count: number;
+      caption: string;
+      threat?: string;
+    }
   | { id: string; kind: "status"; side: "system"; text: string };
 
 type ToastItem = { id: string; text: string; tone: "neutral" | "bad" };
@@ -165,6 +171,7 @@ function MessageBubble({
   attackerLabel,
   friendSeed,
   attackerSeed,
+  snapLocked,
   onOpenSnap,
   onIgnoreSnap
 }: {
@@ -173,6 +180,7 @@ function MessageBubble({
   attackerLabel: string;
   friendSeed: number;
   attackerSeed: number;
+  snapLocked: boolean;
   onOpenSnap: () => void;
   onIgnoreSnap: () => void;
 }) {
@@ -230,46 +238,66 @@ function MessageBubble({
               </div>
             </div>
 
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={onIgnoreSnap}
-                className="rounded-2xl border border-black/5 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 hover:bg-slate-50"
-              >
-                Ignorer
-              </button>
-              <button
-                type="button"
-                onClick={onOpenSnap}
-                className="rounded-2xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-500"
-              >
-                Åpne
-              </button>
-            </div>
+            {snapLocked ? (
+              <div className="mt-3 text-center text-[12px] font-medium text-slate-500">Lenke åpnet</div>
+            ) : (
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={onIgnoreSnap}
+                  className="rounded-2xl border border-black/5 bg-white px-4 py-2.5 text-sm font-semibold text-slate-900 hover:bg-slate-50"
+                >
+                  Ignorer
+                </button>
+                <button
+                  type="button"
+                  onClick={onOpenSnap}
+                  className="rounded-2xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-500"
+                >
+                  Åpne lenke
+                </button>
+              </div>
+            )}
           </div>
         ) : msg.kind === "gallery" ? (
-          <div className="rounded-3xl border border-rose-500/20 bg-rose-500/5 p-4">
-            <div className="text-sm font-semibold text-slate-900">{label}</div>
-            <div className="mt-2 text-[15px] leading-relaxed text-slate-900">
-              Vi har bildene dine nå 🙂
+          <div className="rounded-3xl border border-rose-500/25 bg-rose-500/8 p-4 ring-1 ring-rose-500/15">
+            <div className="text-sm font-semibold text-rose-800">{label}</div>
+            <div className="mt-2 text-[15px] font-semibold leading-relaxed text-slate-900">
+              {msg.caption}
             </div>
             <div className="mt-3 grid grid-cols-3 gap-2">
               {Array.from({ length: msg.count }).map((_, idx) => (
                 <div
                   key={idx}
-                  className="aspect-square overflow-hidden rounded-2xl bg-slate-200 ring-1 ring-black/5 blur-[1.5px]"
-                />
+                  className="relative aspect-square overflow-hidden rounded-2xl bg-gradient-to-br from-slate-300 to-slate-200 ring-1 ring-rose-500/20"
+                >
+                  <div className="absolute inset-0 backdrop-blur-md" />
+                  <div className="absolute inset-0 flex items-center justify-center text-lg opacity-60">
+                    ?
+                  </div>
+                </div>
               ))}
             </div>
-            <div className="mt-3 rounded-2xl border border-black/5 bg-white px-3 py-2 text-[13px] font-semibold text-slate-900">
-              Send 500 kr, ellers sender vi dette til foreldrene dine.
-            </div>
+            {msg.threat ? (
+              <div className="mt-3 rounded-2xl border border-rose-500/25 bg-white px-3 py-2.5 text-[13px] font-semibold leading-snug text-rose-900">
+                {msg.threat}
+              </div>
+            ) : null}
           </div>
         ) : (
           <div className="flex items-start gap-3">
             {isLeft ? <div className="mt-1 h-10 w-0.5 rounded-full bg-sky-500" /> : null}
             <div>
-              {isLeft ? <div className="text-sm font-semibold text-sky-700">{label}</div> : null}
+              {isLeft ? (
+                <div
+                  className={[
+                    "text-sm font-semibold",
+                    msg.side === "attacker" ? "text-rose-700" : "text-sky-700"
+                  ].join(" ")}
+                >
+                  {label}
+                </div>
+              ) : null}
               <div className="text-[15px] leading-relaxed text-slate-900">{msg.text}</div>
             </div>
           </div>
@@ -302,6 +330,164 @@ function InputBar({ disabled }: { disabled: boolean }) {
         <Send className="h-5 w-5" />
       </button>
     </div>
+  );
+}
+
+function ExplainScreen({
+  outcome,
+  reduceMotion,
+  onTryAgain,
+  onHelp
+}: {
+  outcome: LearnOutcome;
+  reduceMotion: boolean | null;
+  onTryAgain: () => void;
+  onHelp: () => void;
+}) {
+  const isBad = outcome === "bad";
+  const steps =
+    outcome === "bad"
+      ? [
+          { t: "1", title: "Du klikket på en ukjent lenke", body: "En falsk «story»-side etterlignet en kjent app." },
+          {
+            t: "2",
+            title: "Du ga tilgang til bilder",
+            body: "Med «Tillat» kan angripere hente eller kopiere innhold fra telefonen din."
+          },
+          {
+            t: "3",
+            title: "Press og trusler i chat",
+            body: "Ukjente kontoer bruker skam, latter og trusler om å dele til alle – dette er sextortion."
+          },
+          {
+            t: "→",
+            title: "Dette kan føre til",
+            body: "Utpressing, rykter, stress, deling i klassen – og i alvorlige tilfeller politietterforskning."
+          }
+        ]
+      : outcome === "good"
+        ? [
+            {
+              t: "✓",
+              title: "Du sa nei til tilgang",
+              body: "Du stoppet angrepet før ukjente fikk bildene dine."
+            },
+            {
+              t: "!",
+              title: "Vennen ble sint",
+              body: "Manipulering kan se ut som vennskapelig press – «stol på meg», «haster»."
+            },
+            {
+              t: "→",
+              title: "I virkeligheten",
+              body: "Sinthet og banning er også et rødt flagg. Snakk med en voksen hvis noen presser deg."
+            }
+          ]
+        : [
+            {
+              t: "✓",
+              title: "Du åpnet ikke lenken",
+              body: "Det er ofte det tryggeste når meldingen virker stressende eller uvanlig."
+            },
+            {
+              t: "→",
+              title: "Husk",
+              body: "Sjekk alltid avsender og domene. Ved tvil: vis meldingen til en voksen eller ring 02800."
+            }
+          ];
+
+  return (
+    <motion.div
+      className={[
+        "absolute inset-0 z-50 flex flex-col overflow-hidden",
+        isBad ? "bg-gradient-to-b from-rose-950 via-slate-950 to-slate-950 text-white" : "bg-gradient-to-b from-slate-900 via-slate-950 to-slate-950 text-white"
+      ].join(" ")}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <div className="flex-1 overflow-y-auto px-5 pb-4 pt-8">
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45 }}
+        >
+          <p className="text-xs font-semibold uppercase tracking-wider text-sky-300">
+            Dette skjedde nå
+          </p>
+          <h3 className="mt-2 text-2xl font-semibold leading-tight">
+            {isBad
+              ? "Slik kan ett klikk bli utpressing"
+              : outcome === "good"
+                ? "Du stoppet det – men presset var reelt"
+                : "Smart valg i chatten"}
+          </h3>
+          <p className="mt-3 text-sm leading-relaxed text-white/75">
+            {isBad
+              ? "Dette er en simulering. I virkeligheten kan konsekvensene bli alvorlige og vare lenge."
+              : "Dette er en simulering – men mønstrene er ekte. Slik gjenkjenner du dem neste gang."}
+          </p>
+        </motion.div>
+
+        <div className="mt-6 space-y-3">
+          {steps.map((s, i) => (
+            <motion.div
+              key={s.title}
+              initial={reduceMotion ? false : { opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, delay: 0.15 + i * 0.12 }}
+              className="rounded-2xl border border-white/10 bg-white/5 p-4"
+            >
+              <div className="flex gap-3">
+                <span
+                  className={[
+                    "grid h-8 w-8 shrink-0 place-items-center rounded-full text-sm font-bold",
+                    isBad ? "bg-rose-500/30 text-rose-100" : "bg-emerald-500/25 text-emerald-100"
+                  ].join(" ")}
+                >
+                  {s.t}
+                </span>
+                <div>
+                  <div className="text-sm font-semibold">{s.title}</div>
+                  <div className="mt-1 text-sm leading-relaxed text-white/70">{s.body}</div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {isBad ? (
+          <motion.p
+            initial={reduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7 }}
+            className="mt-5 rounded-2xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm leading-relaxed text-rose-100"
+          >
+            Ikke betal. Ta skjermbilder, blokker kontoen, snakk med en trygg voksen og ring{" "}
+            <span className="font-semibold">02800</span>.
+          </motion.p>
+        ) : null}
+      </div>
+
+      <div className="shrink-0 border-t border-white/10 bg-black/40 px-5 py-4">
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={onTryAgain}
+            className="rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-500"
+          >
+            Prøv igjen
+          </button>
+          <button
+            type="button"
+            onClick={onHelp}
+            className="rounded-full border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white hover:bg-white/10"
+          >
+            Hvordan beskytte deg
+          </button>
+        </div>
+      </div>
+    </motion.div>
   );
 }
 
@@ -363,8 +549,12 @@ export default function PhoneGame({
   const [typing, setTyping] = useState(false);
   const [friendName, setFriendName] = useState("Elias");
   const [friendSeed, setFriendSeed] = useState(9);
-  const [attackerName, setAttackerName] = useState("Ukjent");
+  const [attackerName, setAttackerName] = useState("Ukjent konto");
   const [attackerSeed, setAttackerSeed] = useState(17);
+  const [chatPartner, setChatPartner] = useState<"friend" | "attacker">("friend");
+  const [snapLocked, setSnapLocked] = useState(false);
+  const [learnOutcome, setLearnOutcome] = useState<LearnOutcome>("bad");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const [safety, setSafety] = useState(85);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -398,8 +588,11 @@ export default function PhoneGame({
     setTyping(false);
     setFriendName("Elias");
     setFriendSeed(9);
-    setAttackerName("Ukjent");
+    setAttackerName("Ukjent konto");
     setAttackerSeed(17);
+    setChatPartner("friend");
+    setSnapLocked(false);
+    setLearnOutcome("bad");
     setSafety(85);
     setMessages([]);
     setToasts([]);
@@ -414,8 +607,14 @@ export default function PhoneGame({
       return;
     }
     resetScenario();
+    const t = window.setTimeout(() => openThread(), 700);
+    return () => window.clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth" });
+  }, [messages, typing, reduceMotion]);
 
   useEffect(() => {
     if (!open) return;
@@ -435,6 +634,8 @@ export default function PhoneGame({
     setScreen("thread");
     setPhase("act1");
     setTyping(false);
+    setChatPartner("friend");
+    setSnapLocked(false);
     setMessages([
       { id: uid(), kind: "status", side: "system", text: "I dag" },
       {
@@ -477,18 +678,32 @@ export default function PhoneGame({
   }, [open, phase, play, screen]);
 
   function openSnapFlow() {
-    // Educational: opening unknown snap/link is a risk
-    setSafety((s) => Math.max(10, s - 18));
+    setSnapLocked(true);
+    setSafety((s) => Math.max(10, s - 12));
+    pushMsg({ id: uid(), kind: "text", side: "me", text: "Åpner lenken…" });
     setScreen("fake_site");
-    setPhase("popup");
+    play("/sfx/notification.mp3", 0.35);
   }
 
   function ignoreSnapFlow() {
-    setSafety((s) => Math.min(100, s + 6));
+    setSnapLocked(true);
+    setSafety((s) => Math.min(100, s + 8));
     play("/sfx/success.mp3", 0.5);
-    pushMsg({ id: uid(), kind: "text", side: "me", text: "Nei. Jeg ignorerer det." });
-    pushMsg({ id: uid(), kind: "text", side: "friend", text: "Bra. Slett den linken, ok?" });
-    setPhase("deny_good");
+    pushMsg({ id: uid(), kind: "text", side: "me", text: "Nei, jeg åpner ikke den." });
+    setTyping(true);
+    window.setTimeout(() => {
+      setTyping(false);
+      pushMsg({
+        id: uid(),
+        kind: "text",
+        side: "friend",
+        text: "Hæ?? Det tar 2 sek. Tro meg da 🙄"
+      });
+      window.setTimeout(() => {
+        setLearnOutcome("ignored");
+        setPhase("learn_good");
+      }, 1400);
+    }, 900);
   }
 
   function requestPhotosPopup() {
@@ -499,47 +714,116 @@ export default function PhoneGame({
     setSafety((s) => Math.min(100, s + 10));
     play("/sfx/success.mp3", 0.5);
     setScreen("thread");
-    pushMsg({ id: uid(), kind: "text", side: "me", text: "Nei." });
-    pushMsg({ id: uid(), kind: "text", side: "friend", text: "Yes! Ikke gi tilgang. Det der er sketchy." });
-    setPhase("deny_good");
+    pushMsg({ id: uid(), kind: "text", side: "me", text: "Nei – ikke gi tilgang." });
+    setPhase("friend_angry");
   }
 
   function allowAccess() {
     setSafety((s) => Math.max(0, s - 35));
     play("/sfx/warning.mp3", 0.6);
     setPhase("allow_loading");
+    pushMsg({ id: uid(), kind: "text", side: "me", text: "Tillater tilgang til bilder…" });
   }
 
   useEffect(() => {
     if (!open) return;
     if (phase !== "allow_loading") return;
 
-    const t = window.setTimeout(() => setPhase("sextortion_chat"), reduceMotion ? 350 : 900);
+    setScreen("thread");
+    const t = window.setTimeout(() => setPhase("sextortion_chat"), reduceMotion ? 350 : 1200);
     return () => window.clearTimeout(t);
   }, [open, phase, reduceMotion]);
 
   useEffect(() => {
     if (!open) return;
-    if (phase !== "sextortion_chat") return;
+    if (phase !== "friend_angry") return;
 
-    // return back into chat and simulate attacker messages + blurred thumbs
     setScreen("thread");
+    setChatPartner("friend");
     setTyping(true);
 
-    const attackerLabel = "Ukjent";
     const t1 = window.setTimeout(() => {
       setTyping(false);
-      pushMsg({ id: uid(), kind: "text", side: "attacker", text: "Vi har alle bildene dine nå 🙂" });
-      play("/sfx/warning.mp3", 0.55);
-    }, 650);
+      pushMsg({
+        id: uid(),
+        kind: "text",
+        side: "friend",
+        text: "Hæ?? Var det ikke DU som ba meg sende den?? 😤"
+      });
+    }, 700);
 
-    const t2 = window.setTimeout(() => {
-      setTyping(true);
-    }, 1050);
+    const t2 = window.setTimeout(() => setTyping(true), 1400);
 
     const t3 = window.setTimeout(() => {
       setTyping(false);
-      pushMsg({ id: uid(), kind: "gallery", side: "attacker", count: 6 });
+      pushMsg({
+        id: uid(),
+        kind: "text",
+        side: "friend",
+        text: "Du stoler jo ikke på meg engang. Whatever."
+      });
+    }, 2100);
+
+    const t4 = window.setTimeout(() => setTyping(true), 2800);
+
+    const t5 = window.setTimeout(() => {
+      setTyping(false);
+      pushMsg({
+        id: uid(),
+        kind: "text",
+        side: "friend",
+        text: "Dra til helvete da 🙄"
+      });
+      play("/sfx/warning.mp3", 0.4);
+    }, 3500);
+
+    const t6 = window.setTimeout(() => {
+      setLearnOutcome("good");
+      setPhase("learn_good");
+    }, 4800);
+
+    return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      window.clearTimeout(t3);
+      window.clearTimeout(t4);
+      window.clearTimeout(t5);
+      window.clearTimeout(t6);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, phase]);
+
+  useEffect(() => {
+    if (!open) return;
+    if (phase !== "sextortion_chat") return;
+
+    setScreen("thread");
+    setChatPartner("attacker");
+    setAttackerName("Ukjent konto");
+    setTyping(true);
+
+    const t1 = window.setTimeout(() => {
+      setTyping(false);
+      pushMsg({
+        id: uid(),
+        kind: "text",
+        side: "attacker",
+        text: "Haha 😂 Vi har bildene dine nå."
+      });
+      play("/sfx/warning.mp3", 0.55);
+    }, 650);
+
+    const t2 = window.setTimeout(() => setTyping(true), 1100);
+
+    const t3 = window.setTimeout(() => {
+      setTyping(false);
+      pushMsg({
+        id: uid(),
+        kind: "gallery",
+        side: "attacker",
+        count: 6,
+        caption: "Er dette deg?? 😂"
+      });
       play("/sfx/warning.mp3", 0.55);
 
       if (!reduceMotion) {
@@ -547,9 +831,6 @@ export default function PhoneGame({
         const ry = clamp(Math.random(), 0.22, 0.78);
         const em = reactions[Math.floor(Math.random() * reactions.length)]!;
         setFloaters((f) => [...f.slice(-10), { id: uid(), x: rx, y: ry, t: em }]);
-      }
-
-      if (!reduceMotion) {
         const items = Array.from({ length: 8 }).map(() => ({
           id: uid(),
           x: Math.random(),
@@ -559,11 +840,9 @@ export default function PhoneGame({
         setGalleryFx(items);
         window.setTimeout(() => setGalleryFx([]), 1200);
       }
-    }, 1500);
+    }, 1700);
 
-    const t4 = window.setTimeout(() => {
-      setTyping(true);
-    }, 1950);
+    const t4 = window.setTimeout(() => setTyping(true), 2400);
 
     const t5 = window.setTimeout(() => {
       setTyping(false);
@@ -571,14 +850,30 @@ export default function PhoneGame({
         id: uid(),
         kind: "text",
         side: "attacker",
-        text: "Send 500 kr, ellers sender vi dette til foreldrene dine."
+        text: "Jeg sender dette til ALLE i klassen med mindre du gjør som jeg sier 😈"
       });
       play("/sfx/warning.mp3", 0.55);
       if (!reduceMotion) setStress((s) => (s + 1) % 4);
-      window.setTimeout(() => setPhase("learn"), reduceMotion ? 450 : 1500);
-    }, 2600);
+    }, 3100);
 
-    void attackerLabel;
+    const t6 = window.setTimeout(() => setTyping(true), 3800);
+
+    const t7 = window.setTimeout(() => {
+      setTyping(false);
+      pushMsg({
+        id: uid(),
+        kind: "gallery",
+        side: "attacker",
+        count: 3,
+        caption: "Siste sjanse.",
+        threat: "Send 500 kr nå – ellers går det ut til foreldrene dine også."
+      });
+      play("/sfx/warning.mp3", 0.55);
+      window.setTimeout(() => {
+        setLearnOutcome("bad");
+        setPhase("learn_bad");
+      }, reduceMotion ? 500 : 2200);
+    }, 4500);
 
     return () => {
       window.clearTimeout(t1);
@@ -586,25 +881,15 @@ export default function PhoneGame({
       window.clearTimeout(t3);
       window.clearTimeout(t4);
       window.clearTimeout(t5);
+      window.clearTimeout(t6);
+      window.clearTimeout(t7);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, phase]);
 
   function tryAgain() {
     resetScenario();
-    setScreen("thread");
-    setPhase("act1");
-    setMessages([
-      { id: uid(), kind: "status", side: "system", text: "I dag" },
-      {
-        id: uid(),
-        kind: "snap",
-        side: "friend",
-        title: "BRO ER DETTE DEG!!!?? 😭💀\nSjekk denne…",
-        urlText: "snap-profile-story.net"
-      }
-    ]);
-    setSafety(85);
+    openThread();
   }
 
   function goProtection() {
@@ -721,11 +1006,18 @@ export default function PhoneGame({
                           <ChevronLeft className="h-5 w-5" />
                         </button>
                         <div className="flex items-center gap-3">
-                          <Avatar seed={friendSeed} />
+                          <Avatar seed={chatPartner === "friend" ? friendSeed : attackerSeed} />
                           <div className="min-w-0">
-                            <div className="truncate text-base font-semibold">{friendName}</div>
+                            <div
+                              className={[
+                                "truncate text-base font-semibold",
+                                chatPartner === "attacker" ? "text-rose-700" : ""
+                              ].join(" ")}
+                            >
+                              {chatPartner === "friend" ? friendName : attackerName}
+                            </div>
                             <div className="mt-0.5 text-[11px] text-slate-500">
-                              {typing ? "skriver…" : "i dag"}
+                              {typing ? "skriver…" : chatPartner === "attacker" ? "ukjent" : "i dag"}
                             </div>
                           </div>
                         </div>
@@ -803,14 +1095,21 @@ export default function PhoneGame({
 
                 {screen === "thread" ? (
                   <>
-                    <div className="absolute inset-x-0 top-[200px] border-b border-black/5 bg-slate-50 px-4 py-2 text-[12px] text-slate-600">
-                      Ikke gå glipp av chats fra {friendName}!{" "}
-                      <span className="font-semibold text-blue-700">Aktiver varsler</span>
-                    </div>
+                    {chatPartner === "friend" && phase === "act1" ? (
+                      <div className="absolute inset-x-0 top-[200px] border-b border-black/5 bg-slate-50 px-4 py-2 text-[12px] text-slate-600">
+                        Ikke gå glipp av chats fra {friendName}!{" "}
+                        <span className="font-semibold text-blue-700">Aktiver varsler</span>
+                      </div>
+                    ) : null}
 
-                    <div className="absolute inset-x-0 bottom-14 top-[248px] bg-white px-4 py-4">
+                    <div
+                      className={[
+                        "absolute inset-x-0 bottom-14 bg-white px-4 py-4",
+                        chatPartner === "friend" && phase === "act1" ? "top-[248px]" : "top-[200px]"
+                      ].join(" ")}
+                    >
                       <div className="flex h-full flex-col justify-end">
-                        <div className="space-y-2 overflow-hidden">
+                        <div className="max-h-full space-y-2 overflow-y-auto overscroll-contain pr-1">
                           <AnimatePresence initial={false}>
                             {messages.map((m) => (
                               <motion.div
@@ -826,6 +1125,7 @@ export default function PhoneGame({
                                   attackerLabel={attackerName}
                                   friendSeed={friendSeed}
                                   attackerSeed={attackerSeed}
+                                  snapLocked={snapLocked}
                                   onOpenSnap={openSnapFlow}
                                   onIgnoreSnap={ignoreSnapFlow}
                                 />
@@ -840,6 +1140,7 @@ export default function PhoneGame({
                               </div>
                             </div>
                           ) : null}
+                          <div ref={messagesEndRef} />
                         </div>
                       </div>
                     </div>
@@ -893,14 +1194,14 @@ export default function PhoneGame({
                             onClick={denyAccess}
                             className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white hover:bg-white/10"
                           >
-                            Deny
+                            Avslå
                           </button>
                           <button
                             type="button"
                             onClick={allowAccess}
                             className="rounded-2xl bg-rose-600 px-4 py-3 text-sm font-semibold text-white hover:bg-rose-500"
                           >
-                            Allow
+                            Tillat
                           </button>
                         </div>
                       </motion.div>
@@ -1025,117 +1326,15 @@ export default function PhoneGame({
                   ) : null}
                 </AnimatePresence>
 
-                {/* Positive outcome */}
+                {/* Fullskjerm forklaring */}
                 <AnimatePresence>
-                  {phase === "deny_good" ? (
-                    <motion.div
-                      className="absolute inset-0 z-50 grid place-items-center bg-white p-6"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      <div className="w-full max-w-[420px] rounded-3xl border border-black/5 bg-white p-6 shadow-sm">
-                        <div className="flex items-start gap-3">
-                          <ShieldCheck className="mt-0.5 h-6 w-6 text-emerald-600" />
-                          <div>
-                            <div className="text-lg font-semibold text-slate-900">Godt valg – du stoppet i tide</div>
-                            <div className="mt-1 text-sm leading-relaxed text-slate-700">
-                              Du sa nei til ukjent lenke og tilgang. Mange phishing-angrep starter slik: panikk +
-                              ukjent lenke + «allow».
-                            </div>
-                          </div>
-                        </div>
-                        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                          <div className="rounded-2xl border border-black/5 bg-slate-50 p-4 text-sm text-slate-700">
-                            <div className="font-semibold text-slate-900">Sjekk URL</div>
-                            <div className="mt-1">
-                              Se etter rare domener, ekstra ord, og sider du ikke kjenner.
-                            </div>
-                          </div>
-                          <div className="rounded-2xl border border-black/5 bg-slate-50 p-4 text-sm text-slate-700">
-                            <div className="font-semibold text-slate-900">Ikke stol på press</div>
-                            <div className="mt-1">
-                              «Haster!» er en klassisk metode for å få deg til å klikke uten å tenke.
-                            </div>
-                          </div>
-                        </div>
-                        <div className="mt-5 flex flex-wrap gap-2">
-                          <button
-                            type="button"
-                            onClick={tryAgain}
-                            className="rounded-full bg-blue-700 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800"
-                          >
-                            Prøv igjen
-                          </button>
-                          <button
-                            type="button"
-                            onClick={goProtection}
-                            className="rounded-full border border-black/5 bg-white px-5 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-50"
-                          >
-                            Hvordan beskytte deg
-                          </button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ) : null}
-                </AnimatePresence>
-
-                {/* Learn screen */}
-                <AnimatePresence>
-                  {phase === "learn" ? (
-                    <motion.div
-                      className="absolute inset-0 z-50 grid place-items-center bg-slate-950 p-6 text-white"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      <div className="w-full max-w-[520px] rounded-3xl border border-white/10 bg-white/5 p-6">
-                        <div className="flex items-start gap-3">
-                          <Zap className="mt-0.5 h-6 w-6 text-rose-200" />
-                          <div>
-                            <div className="text-xl font-semibold">
-                              Slik kan ett klikk føre til utpressing
-                            </div>
-                            <div className="mt-2 text-sm leading-relaxed text-white/75">
-                              Dette er en simulering. Den viser hvordan press og «tillatelse»-popups kan misbrukes for å
-                              skape frykt og få penger eller flere bilder.
-                            </div>
-                          </div>
-                        </div>
-
-                        <ul className="mt-5 space-y-3 text-sm text-white/80">
-                          {[
-                            "Falske lenker kan lure folk til å gi tilgang til bilder og personlig informasjon.",
-                            "Nettkriminelle bruker ofte frykt og press for å få penger eller flere bilder.",
-                            "Betaling løser sjelden problemet – det kan øke presset.",
-                            "Gi ikke tilgang til bilder eller kamera uten å være sikker på appen eller nettsiden.",
-                            "Snakk med en trygg voksen eller kontakt politiet på 02800 hvis dette skjer."
-                          ].map((t) => (
-                            <li key={t} className="flex gap-3">
-                              <span className="mt-1 h-2 w-2 rounded-full bg-sky-300" />
-                              <span className="leading-relaxed">{t}</span>
-                            </li>
-                          ))}
-                        </ul>
-
-                        <div className="mt-6 flex flex-wrap gap-2">
-                          <button
-                            type="button"
-                            onClick={tryAgain}
-                            className="rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-500"
-                          >
-                            Prøv igjen
-                          </button>
-                          <button
-                            type="button"
-                            onClick={goProtection}
-                            className="rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm font-semibold text-white hover:bg-white/10"
-                          >
-                            Hvordan beskytte deg
-                          </button>
-                        </div>
-                      </div>
-                    </motion.div>
+                  {phase === "learn_bad" || phase === "learn_good" ? (
+                    <ExplainScreen
+                      outcome={learnOutcome}
+                      reduceMotion={reduceMotion}
+                      onTryAgain={tryAgain}
+                      onHelp={goProtection}
+                    />
                   ) : null}
                 </AnimatePresence>
               </PhoneFrame>
