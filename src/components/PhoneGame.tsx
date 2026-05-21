@@ -28,6 +28,7 @@ type Phase =
   | "allow_loading"
   | "sextortion_chat"
   | "friend_angry"
+  | "chat_await_continue"
   | "verdict"
   | "learn_bad"
   | "learn_good";
@@ -774,7 +775,7 @@ export default function PhoneGame({
       window.setTimeout(() => {
         setLearnOutcome("ignored");
         setTyping(false);
-        setPhase("verdict");
+        setPhase("chat_await_continue");
       }, 1400);
     }, 900);
   }
@@ -853,7 +854,7 @@ export default function PhoneGame({
     const t6 = window.setTimeout(() => {
       setLearnOutcome("good");
       setTyping(false);
-      setPhase("verdict");
+      setPhase("chat_await_continue");
     }, 4800);
 
     return () => {
@@ -930,25 +931,11 @@ export default function PhoneGame({
       if (!reduceMotion) setStress((s) => (s + 1) % 4);
     }, 3100);
 
-    const t6 = window.setTimeout(() => setTyping(true), 3800);
-
-    const t7 = window.setTimeout(() => {
+    const t6 = window.setTimeout(() => {
+      setLearnOutcome("bad");
       setTyping(false);
-      pushMsg({
-        id: uid(),
-        kind: "gallery",
-        side: "attacker",
-        count: 3,
-        caption: "Siste sjanse.",
-        threat: "Send 500 kr nå – ellers går det ut til foreldrene dine også."
-      });
-      play("/sfx/warning.mp3", 0.55);
-      window.setTimeout(() => {
-        setLearnOutcome("bad");
-        setTyping(false);
-        setPhase("verdict");
-      }, reduceMotion ? 400 : 800);
-    }, 4500);
+      setPhase("chat_await_continue");
+    }, 3800);
 
     return () => {
       window.clearTimeout(t1);
@@ -957,7 +944,6 @@ export default function PhoneGame({
       window.clearTimeout(t4);
       window.clearTimeout(t5);
       window.clearTimeout(t6);
-      window.clearTimeout(t7);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, phase]);
@@ -965,6 +951,10 @@ export default function PhoneGame({
   function tryAgain() {
     resetScenario();
     openThread();
+  }
+
+  function continueFromChat() {
+    setPhase("verdict");
   }
 
   function continueToResult() {
@@ -1183,8 +1173,9 @@ export default function PhoneGame({
 
                     <div
                       className={[
-                        "absolute inset-x-0 bottom-14 bg-white px-4 py-4",
-                        chatPartner === "friend" && phase === "act1" ? "top-[248px]" : "top-[200px]"
+                        "absolute inset-x-0 bg-white px-4 py-4",
+                        chatPartner === "friend" && phase === "act1" ? "top-[248px]" : "top-[200px]",
+                        phase === "chat_await_continue" ? "bottom-[118px]" : "bottom-14"
                       ].join(" ")}
                     >
                       <div className="flex h-full flex-col justify-end">
@@ -1224,11 +1215,24 @@ export default function PhoneGame({
                       </div>
                     </div>
 
-                    <div className="absolute inset-x-0 bottom-14 px-4 pb-3" />
-
-                    <div className="absolute inset-x-0 bottom-0">
-                      <InputBar disabled />
-                    </div>
+                    {phase === "chat_await_continue" ? (
+                      <div className="absolute inset-x-0 bottom-0 z-20 border-t border-black/5 bg-white px-4 py-4">
+                        <p className="mb-3 text-center text-[12px] text-slate-600">
+                          Les meldingene over. Når du er klar, gå videre.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={continueFromChat}
+                          className="w-full rounded-full bg-blue-700 px-5 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-800"
+                        >
+                          Fortsett
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="absolute inset-x-0 bottom-0">
+                        <InputBar disabled />
+                      </div>
+                    )}
                   </>
                 ) : null}
 
