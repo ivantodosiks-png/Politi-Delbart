@@ -10,22 +10,22 @@ export default function Footer() {
             <img src={logoFooter} alt="Politiet" className="h-10 w-auto" loading="lazy" />
             <div className="text-sm text-slate-700">
               <div className="font-semibold text-slate-900">Politiet</div>
-              <div>Forebygging og råd</div>
+              <div>Kampanje for digital trygghet og samtykke</div>
             </div>
           </div>
 
           <div className="text-sm text-slate-700">
             <a className="hover:underline" href="#help">
-              Kontakt og hjelp
+              Hjelp og neste steg
             </a>
           </div>
         </div>
 
         <div className="pb-10 text-xs text-slate-500">
-          © {new Date().getFullYear()} • Informasjonsside for bevisstgjøring.
+          © {new Date().getFullYear()} Politiet · Delbart · Informasjon og forebygging. Innholdet
+          erstatter ikke juridisk rådgivning.
         </div>
       </Container>
     </footer>
   );
 }
-

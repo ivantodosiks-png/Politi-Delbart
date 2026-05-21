@@ -6,28 +6,28 @@ import { Ban, FileWarning, Link2, ShieldCheck, TriangleAlert } from "lucide-reac
 const points = [
   {
     icon: Ban,
-    title: "Del aldri videre",
-    text: "Å dele intime bilder uten samtykke kan være straffbart — selv om du «bare sender til en venn»."
+    title: "Del aldri uten samtykke",
+    text: "Å sende intime bilder videre – også til én «venn» – kan være straffbart og ødelegge tillit. Spør alltid: Har personen sagt ja til at dette deles?"
   },
   {
     icon: Link2,
-    title: "Falske lenker (phishing)",
-    text: "Lenker kan se «normale» ut, men lede til falske sider som prøver å få deg til å gi fra deg informasjon eller tillatelser."
+    title: "Sjekk lenken – ikke bare avsenderen",
+    text: "Kjente navn og logoer kan kopieres. Hold musepekeren over lenken, se hele domenet, og vær ekstra skeptisk i DM og gruppechatter."
   },
   {
     icon: FileWarning,
-    title: "Tillatelser og tilgang",
-    text: "Gi ikke tilgang til bilder/kamera uten at du er helt sikker på appen/nettsiden. Spør en voksen hvis du er i tvil."
+    title: "Gi minst mulig tilgang",
+    text: "En popup om «bilder» eller «kamera» fra ukjent side er ofte første steg i et angrep. Si nei, lukk fanen, og spør en voksen du stoler på."
   },
   {
     icon: ShieldCheck,
-    title: "Slik gjør du det tryggere",
-    text: "Sjekk URL, tenk før du klikker, bruk sterke passord og totrinnsbekreftelse (2FA) på viktige kontoer."
+    title: "Gjør kontoene dine vanskeligere å ta",
+    text: "Sterke passord, unike passord per tjeneste og totrinnsbekreftelse (2FA) på e-post og sosiale medier reduserer risiko for innbrudd og utpressing."
   },
   {
     icon: TriangleAlert,
-    title: "Sextortion (utpressing)",
-    text: "Nettkriminelle bruker frykt og press: «betal ellers…». Ikke betal, ta vare på bevis og søk hjelp."
+    title: "Ikke betal – dokumenter – få hjelp",
+    text: "Betaling stopper sjelden truslene. Ta bevis, blokker, rapporter i appen, og kontakt politiet (02800) eller en trygg voksen."
   }
 ];
 
@@ -40,8 +40,8 @@ export default function InfoSection() {
         <div className="py-12 sm:py-14">
           <SectionTitle
             eyebrow="Digital trygghet"
-            title="Hva handler dette om?"
-            description="Dette er en kort guide til falske lenker (phishing), tillatelser til bilder og sextortion. Målet er å hjelpe deg å ta tryggere valg."
+            title="Slik beskytter du deg – og andre"
+            description="Kampanjen Delbart handler om samtykke, falske lenker og digital utpressing. Her får du fem konkrete prinsipper du kan bruke i hverdagen – før noe skjer."
           />
 
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -62,12 +62,17 @@ export default function InfoSection() {
           </div>
 
           <div className="mt-10 rounded-sm border border-slate-200 bg-slate-50 p-6 text-sm text-slate-700">
-            <div className="font-semibold text-slate-900">Røde flagg du bør reagere på</div>
+            <div className="font-semibold text-slate-900">Røde flagg – stopp før du klikker</div>
             <ul className="mt-2 list-disc space-y-1 pl-5">
-              <li>«Haster!!!» eller «ER DETTE DEG!?» som presser deg til å klikke.</li>
-              <li>Ukjente domener som ligner på kjente tjenester.</li>
-              <li>Popups som ber om tilgang til bilder/kamera uten god forklaring.</li>
-              <li>Trusler, skam eller krav om penger.</li>
+              <li>Meldinger med panikk: «HASTER!!!», «ER DETTE DEG!?», «slett innen 10 min».</li>
+              <li>
+                Domener som ligner kjente tjenester, men med ekstra ord eller rare tegn (f.eks.{" "}
+                <span className="font-mono text-xs">snap-profile-story.net</span>).
+              </li>
+              <li>
+                Forespørsler om bilder, kamera, mikrofon eller «bekreft konto» uten tydelig grunn.
+              </li>
+              <li>Trusler, skam, krav om penger, Vipps eller «flere bilder hvis ikke…».</li>
             </ul>
           </div>
         </div>
@@ -75,4 +80,3 @@ export default function InfoSection() {
     </section>
   );
 }
-

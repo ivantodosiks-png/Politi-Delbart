@@ -20,7 +20,7 @@ export default function Header({ onStartExperience }: { onStartExperience: () =>
             onClick={onStartExperience}
             className="rounded-full bg-blue-700 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800"
           >
-            Start scenario
+            Prøv scenarioet
           </button>
         </div>
       </Container>

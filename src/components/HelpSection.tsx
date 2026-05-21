@@ -6,23 +6,23 @@ import { FileText, Phone, ShieldAlert, Trash2, UserRoundCheck } from "lucide-rea
 const steps = [
   {
     icon: Trash2,
-    title: "Stans spredning",
-    text: "Be om at innhold slettes. Ikke videresend. Ikke «lagre for sikkerhets skyld»."
+    title: "1. Stopp spredning",
+    text: "Be alle som har mottatt innhold om å slette. Ikke del videre, ikke lagre kopier «til senere»."
   },
   {
     icon: FileText,
-    title: "Ta vare på bevis",
-    text: "Skjermbilder, lenker, brukernavn og tidspunkt. Noter hvor det ligger."
+    title: "2. Sikre bevis",
+    text: "Skjermbilder, URL, brukernavn, dato og tid. Lag en kort tidslinje med det du husker."
   },
   {
     icon: UserRoundCheck,
-    title: "Snakk med noen",
-    text: "Kontakt en trygg voksen, skole, helsetjeneste eller rådgiver. Du skal ikke stå alene."
+    title: "3. Snakk med noen du stoler på",
+    text: "Du trenger støtte før du tar neste steg. Mange skoler og kommuner har rutiner for digital vold og deling."
   },
   {
     icon: ShieldAlert,
-    title: "Meld fra",
-    text: "Hvis du ønsker å anmelde eller få veiledning, ta kontakt med politiet."
+    title: "4. Vurder å melde fra til politiet",
+    text: "På 02800 får du vite hva som er mulig, uten at du må anmelde med én gang."
   }
 ];
 
@@ -35,9 +35,9 @@ export default function HelpSection() {
         <div className="py-12 sm:py-14">
           <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
             <SectionTitle
-              eyebrow="Hjelp og kontakt"
-              title="Hva gjør du hvis du blir lurt eller presset?"
-              description="Dette er en generell veiledning. Ved akutt fare: ring 112."
+              eyebrow="Hjelp og neste steg"
+              title="Hva gjør du hvis du er lurt, utpresset eller har delt noe du angrer på?"
+              description="Følg stegene under i rekkefølge. Du har ikke gjort noe galt ved å be om hjelp. Ved akutt fare: ring 112."
             />
 
             <div className="w-full max-w-xl rounded-sm border border-slate-200 bg-white p-6">
@@ -59,9 +59,11 @@ export default function HelpSection() {
                 </a>
               </div>
 
-              <div className="mt-4 text-sm text-slate-700">
-                Hvis du ikke vil ringe: snakk med en trygg voksen eller bruk lokale hjelpe- og støttetjenester
-                (skole, helsestasjon, rådgiver).
+              <div className="mt-4 text-sm leading-relaxed text-slate-700">
+                <span className="font-semibold">02800</span> – veiledning, anmeldelse og spørsmål om
+                nettkriminalitet. <span className="font-semibold">112</span> – når du er i fare eller
+                noen truer deg fysisk. Vil du ikke ringe: vis denne siden til en lærer, helsesykepleier,
+                forelder eller annen voksen du stoler på.
               </div>
             </div>
           </div>
@@ -90,7 +92,10 @@ export default function HelpSection() {
                 <li>Ikke betal. Ikke send flere bilder.</li>
                 <li>Ta skjermbilder og lagre bevis (brukernavn, lenker, tidspunkt).</li>
                 <li>Blokker kontoen og rapporter i appen.</li>
-                <li>Snakk med en trygg voksen eller kontakt politiet.</li>
+                <li>Snakk med en trygg voksen eller kontakt politiet på 02800.</li>
+                <li>
+                  Politiet ser ofte at betaling ikke stopper truslene – kontakt heller 02800 tidlig.
+                </li>
               </ul>
             </div>
 
@@ -101,6 +106,11 @@ export default function HelpSection() {
                 <li>Oppdater telefon og apper.</li>
                 <li>Vær skeptisk til lenker fra meldinger.</li>
                 <li>Gi færrest mulig tillatelser.</li>
+                <li>Slå av «ukjente kan sende meldinger» der det er mulig.</li>
+                <li>Rapporter og blokker kontoer som presser deg.</li>
+                <li>
+                  Snakk med venner om å ikke dele andres bilder – det er også ditt ansvar.
+                </li>
               </ul>
             </div>
           </div>
@@ -109,4 +119,3 @@ export default function HelpSection() {
     </section>
   );
 }
-
