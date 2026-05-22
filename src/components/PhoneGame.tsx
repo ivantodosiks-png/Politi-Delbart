@@ -831,7 +831,7 @@ export default function PhoneGame({
           title: "BRO ER DETTE DEG!!!?? 😭💀\nSjekk denne…",
           urlText: "snap-profile-story.net"
         });
-        play("/sfx/notifications.mp3", 0.4);
+        play("/sfx/notifications.mp3", 1);
       }, 1400);
     }, 800);
   }
