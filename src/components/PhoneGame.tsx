@@ -12,13 +12,13 @@ import {
   Lock,
   Search,
   Send,
-  Shield,
   Sparkles,
   TriangleAlert,
   Users,
   X
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import CollapsibleText from "./CollapsibleText";
 
 type Screen = "inbox" | "thread" | "fake_site";
 type Phase =
@@ -123,7 +123,11 @@ function Avatar({ seed = 7 }: { seed?: number }) {
   );
 }
 
+// Safety meter removed (was showing "Digital trygghet" and a score box)
 function SafetyMeter({ value }: { value: number }) {
+  void value;
+  return null;
+  /*
   const pct = clamp(value, 0, 100);
   const tone =
     pct >= 70 ? "bg-emerald-500" : pct >= 40 ? "bg-amber-500" : "bg-rose-500";
@@ -144,6 +148,7 @@ function SafetyMeter({ value }: { value: number }) {
       </div>
     </div>
   );
+  */
 }
 
 function TypingDots({ dark }: { dark: boolean }) {
@@ -184,6 +189,7 @@ function MessageBubble({
   attackerLabel,
   friendSeed,
   attackerSeed,
+  meSeed,
   snapLocked,
   onOpenSnap,
   onIgnoreSnap,
@@ -194,6 +200,7 @@ function MessageBubble({
   attackerLabel: string;
   friendSeed: number;
   attackerSeed: number;
+  meSeed: number;
   snapLocked: boolean;
   onOpenSnap: () => void;
   onIgnoreSnap: () => void;
@@ -212,13 +219,14 @@ function MessageBubble({
 
   const isLeft = msg.side === "friend" || msg.side === "attacker";
   const align = isLeft ? "justify-start" : "justify-end";
-  const showAvatar = isLeft;
-  const avatarSeed = msg.side === "friend" ? friendSeed : attackerSeed;
+  const showAvatar = true;
+  const avatarSeed =
+    msg.side === "friend" ? friendSeed : msg.side === "attacker" ? attackerSeed : meSeed;
   const label = msg.side === "friend" ? friendLabel : attackerLabel;
 
   return (
     <div className={`flex ${align}`}>
-      {showAvatar ? (
+      {showAvatar && isLeft ? (
         <div className="mr-2 mt-1 shrink-0">
           <Avatar seed={avatarSeed} />
         </div>
@@ -257,7 +265,12 @@ function MessageBubble({
                   {msg.urlText}
                 </span>
               </div>
-              <div className="h-28 w-full bg-gradient-to-br from-slate-200 to-slate-100 blur-[2px]" />
+              <img
+                src="/istoria.png"
+                alt="Sladdet story-bilde"
+                className="h-28 w-full object-cover blur-[6px] saturate-75"
+                loading="lazy"
+              />
               <div className="border-t border-black/5 bg-white px-3 py-2 text-[12px] text-slate-600">
                 Trykk «Åpne» for å se
               </div>
@@ -301,9 +314,12 @@ function MessageBubble({
                   className="relative aspect-square overflow-hidden rounded-2xl bg-gradient-to-br from-slate-300 to-slate-200 ring-1 ring-rose-500/20"
                 >
                   <div className="absolute inset-0 backdrop-blur-md" />
-                  <div className="absolute inset-0 flex items-center justify-center text-lg opacity-60">
-                    ?
-                  </div>
+                  <img
+                    src="/istoria.png"
+                    alt="Sladdet bilde"
+                    className="absolute inset-0 h-full w-full object-cover blur-[10px] saturate-75 opacity-80"
+                    loading="lazy"
+                  />
                 </div>
               ))}
             </div>
@@ -332,6 +348,11 @@ function MessageBubble({
           </div>
         )}
       </div>
+      {showAvatar && !isLeft ? (
+        <div className="ml-2 mt-1 shrink-0">
+          <Avatar seed={avatarSeed} />
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -443,6 +464,7 @@ function ExplainScreen({
   onHelp: () => void;
 }) {
   const isBad = outcome === "bad";
+  const [showAllSteps, setShowAllSteps] = useState(false);
   const steps =
     outcome === "bad"
       ? [
@@ -528,7 +550,7 @@ function ExplainScreen({
         </motion.div>
 
         <div className="mt-6 space-y-3">
-          {steps.map((s, i) => (
+          {(showAllSteps ? steps : steps.slice(0, 2)).map((s, i) => (
             <motion.div
               key={s.title}
               initial={reduceMotion ? false : { opacity: 0, x: -12 }}
@@ -547,12 +569,25 @@ function ExplainScreen({
                 </span>
                 <div>
                   <div className="text-sm font-semibold">{s.title}</div>
-                  <div className="mt-1 text-sm leading-relaxed text-white/70">{s.body}</div>
+                  <CollapsibleText lines={2} className="mt-1 text-sm leading-relaxed text-white/70">
+                    {s.body}
+                  </CollapsibleText>
                 </div>
               </div>
             </motion.div>
           ))}
         </div>
+
+        {steps.length > 2 ? (
+          <button
+            type="button"
+            onClick={() => setShowAllSteps((v) => !v)}
+            className="mt-3 inline-flex items-center text-xs font-semibold text-sky-200/90 hover:text-sky-200"
+            aria-expanded={showAllSteps}
+          >
+            {showAllSteps ? "Skjul ekstra" : "Vis mer"}
+          </button>
+        ) : null}
 
         {isBad ? (
           <motion.p
@@ -612,7 +647,12 @@ function FakeSite({
           </div>
 
           <div className="mt-4 overflow-hidden rounded-2xl ring-1 ring-white/10">
-            <div className="h-44 w-full bg-gradient-to-br from-white/10 to-white/5 blur-[1px]" />
+            <img
+              src="/istoria.png"
+              alt="Forhåndsvisning av story"
+              className="h-44 w-full object-cover blur-[7px] saturate-75 opacity-90"
+              loading="lazy"
+            />
             <div className="border-t border-white/10 bg-black/30 px-4 py-3 text-[12px] text-white/75">
               Tap to view
             </div>
@@ -645,8 +685,8 @@ export default function PhoneGame({
   const [screen, setScreen] = useState<Screen>("inbox");
   const [phase, setPhase] = useState<Phase>("idle");
   const [typing, setTyping] = useState(false);
-  const [friendName, setFriendName] = useState("Elias");
-  const [friendSeed, setFriendSeed] = useState(9);
+  const [friendName, setFriendName] = useState("Ukjent konto");
+  const [friendSeed, setFriendSeed] = useState(17);
   const [attackerName, setAttackerName] = useState("Ukjent konto");
   const [attackerSeed, setAttackerSeed] = useState(17);
   const [chatPartner, setChatPartner] = useState<"friend" | "attacker">("friend");
@@ -654,7 +694,6 @@ export default function PhoneGame({
   const [learnOutcome, setLearnOutcome] = useState<LearnOutcome>("bad");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const [safety, setSafety] = useState(85);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const [stress, setStress] = useState(0);
@@ -684,14 +723,13 @@ export default function PhoneGame({
     setScreen("inbox");
     setPhase("idle");
     setTyping(false);
-    setFriendName("Elias");
-    setFriendSeed(9);
+    setFriendName("Ukjent konto");
+    setFriendSeed(17);
     setAttackerName("Ukjent konto");
     setAttackerSeed(17);
     setChatPartner("friend");
     setSnapLocked(false);
     setLearnOutcome("bad");
-    setSafety(85);
     setMessages([]);
     setToasts([]);
     setStress(0);
@@ -794,14 +832,12 @@ export default function PhoneGame({
     setSnapLocked(true);
     lockSnapMessages();
     lockConfirmSnap();
-    setSafety((s) => Math.max(10, s - 12));
     pushMsg({ id: uid(), kind: "text", side: "me", text: "Åpner lenken…" });
     setScreen("fake_site");
     play("/sfx/notification.mp3", 0.35);
   }
 
   function ignoreSnapFlow() {
-    setSafety((s) => Math.min(100, s + 4));
     lockSnapMessages();
     pushMsg({ id: uid(), kind: "text", side: "me", text: "Nei, jeg åpner ikke den." });
     setTyping(true);
@@ -831,13 +867,12 @@ export default function PhoneGame({
           title: "BRO ER DETTE DEG!!!?? 😭💀\nSjekk denne…",
           urlText: "snap-profile-story.net"
         });
-        play("/sfx/notifications.mp3", 1);
+        play("/sfx/notification.mp3", 1);
       }, 1400);
     }, 800);
   }
 
   function ignoreSnapConfirm() {
-    setSafety((s) => Math.min(100, s + 6));
     lockConfirmSnap();
     play("/sfx/success.mp3", 0.45);
     pushMsg({ id: uid(), kind: "text", side: "me", text: "Ja. Jeg ignorerer." });
@@ -850,7 +885,6 @@ export default function PhoneGame({
   }
 
   function denyAccess() {
-    setSafety((s) => Math.min(100, s + 10));
     play("/sfx/success.mp3", 0.5);
     setScreen("thread");
     pushMsg({ id: uid(), kind: "text", side: "me", text: "Nei – ikke gi tilgang." });
@@ -858,7 +892,6 @@ export default function PhoneGame({
   }
 
   function allowAccess() {
-    setSafety((s) => Math.max(0, s - 35));
     play("/sfx/warning.mp3", 0.6);
     setPhase("allow_loading");
     pushMsg({ id: uid(), kind: "text", side: "me", text: "Tillater tilgang til bilder…" });
@@ -1169,10 +1202,7 @@ export default function PhoneGame({
                   )}
                 </div>
 
-                {/* Safety meter (overlay on both screens) */}
-                <div className="absolute left-4 right-4 top-[110px] z-10">
-                  <SafetyMeter value={safety} />
-                </div>
+                {/* Safety meter removed */}
 
                 {screen === "inbox" ? (
                   <div className="absolute inset-0 bg-white pt-[200px]">
@@ -1260,6 +1290,7 @@ export default function PhoneGame({
                                   attackerLabel={attackerName}
                                   friendSeed={friendSeed}
                                   attackerSeed={attackerSeed}
+                                  meSeed={5}
                                   snapLocked={snapLocked}
                                   onOpenSnap={openSnapFlow}
                                   onIgnoreSnap={ignoreSnapFlow}
@@ -1505,4 +1536,3 @@ export default function PhoneGame({
     </section>
   );
 }
-
