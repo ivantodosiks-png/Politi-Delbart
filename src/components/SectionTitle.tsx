@@ -40,7 +40,7 @@ export default function SectionTitle({
         {title}
       </motion.h2>
       {description ? (
-        <motion.p
+        <motion.div
           initial={reduceMotion ? false : { ...fadeUp.hidden, y: 10 }}
           whileInView={reduceMotion ? undefined : fadeUp.visible}
           viewport={viewportOnce}
@@ -48,7 +48,7 @@ export default function SectionTitle({
           className="mt-3 text-sm leading-relaxed text-slate-700"
         >
           {description}
-        </motion.p>
+        </motion.div>
       ) : null}
     </div>
   );

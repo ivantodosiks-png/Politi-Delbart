@@ -3,6 +3,7 @@ import AnimatedCard from "./motion/AnimatedCard";
 import StaggerGrid, { StaggerItem } from "./motion/StaggerGrid";
 import { motion, useReducedMotion } from "framer-motion";
 import { easeOut, fadeUp } from "../lib/motion";
+import CollapsibleText from "./CollapsibleText";
 
 const heroCards = [
   {
@@ -26,6 +27,20 @@ const heroCards = [
 
 export default function Hero() {
   const reduceMotion = useReducedMotion();
+  const kortForklart = [
+    {
+      label: "Phishing",
+      text: "falske meldinger eller lenker som lurer deg til å klikke, logge inn eller gi tillatelser."
+    },
+    {
+      label: "Sextortion",
+      text: "noen truer med å dele bilder eller videoer for å få penger, flere bilder eller mer kontroll over deg."
+    },
+    {
+      label: "Tillatelser",
+      text: "ukjente apper og nettsider skal ikke få tilgang til bilder, kamera eller kontakter uten at du er helt sikker."
+    }
+  ];
 
   return (
     <section id="top" className="hero-ambient bg-white">
@@ -40,17 +55,19 @@ export default function Hero() {
             >
               Delbart: Ett klikk kan endre alt
             </motion.h1>
-            <motion.p
+            <motion.div
               initial={reduceMotion ? false : { ...fadeUp.hidden, y: 14 }}
               animate={reduceMotion ? undefined : fadeUp.visible}
               transition={{ duration: 0.6, delay: 0.1, ease: easeOut }}
               className="mt-4 text-base leading-relaxed text-slate-700"
             >
-              Ett klikk på feil lenke, eller én deling uten samtykke, kan påvirke deg, andre og
-              straffbarheten. Her får du konkrete råd om phishing, falske lenker og sextortion – og
-              et kort scenario som viser hvordan det kan skje.{" "}
-              <span className="font-semibold">Stopp. Tenk. Spør.</span>
-            </motion.p>
+              <CollapsibleText lines={3} className="text-base leading-relaxed text-slate-700">
+                Ett klikk på feil lenke, eller én deling uten samtykke, kan påvirke deg, andre og
+                straffbarheten. Her får du konkrete råd om phishing, falske lenker og sextortion – og
+                et kort scenario som viser hvordan det kan skje.{" "}
+                <span className="font-semibold">Stopp. Tenk. Spør.</span>
+              </CollapsibleText>
+            </motion.div>
 
             <motion.p
               initial={reduceMotion ? false : { opacity: 0 }}
@@ -71,7 +88,9 @@ export default function Hero() {
                   className="h-full rounded-sm border border-slate-200 bg-white p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
                 >
                   <div className="text-sm font-semibold text-slate-900">{c.title}</div>
-                  <div className="mt-2 text-sm leading-relaxed text-slate-700">{c.text}</div>
+                  <CollapsibleText lines={3} className="mt-2 text-sm leading-relaxed text-slate-700">
+                    {c.text}
+                  </CollapsibleText>
                 </StaggerItem>
               ))}
             </StaggerGrid>
@@ -83,18 +102,21 @@ export default function Hero() {
               <div className="font-semibold text-slate-900">Kort forklart</div>
               <ul className="mt-2 list-disc space-y-1 pl-5">
                 <li>
-                  <span className="font-semibold">Phishing:</span> falske meldinger eller lenker som
-                  lurer deg til å klikke, logge inn eller gi tillatelser.
-                </li>
-                <li>
-                  <span className="font-semibold">Sextortion:</span> noen truer med å dele bilder eller
-                  videoer for å få penger, flere bilder eller mer kontroll over deg.
-                </li>
-                <li>
-                  <span className="font-semibold">Tillatelser:</span> ukjente apper og nettsider skal
-                  ikke få tilgang til bilder, kamera eller kontakter uten at du er helt sikker.
+                  <span className="font-semibold">{kortForklart[0]!.label}:</span> {kortForklart[0]!.text}
                 </li>
               </ul>
+              <details className="mt-2">
+                <summary className="cursor-pointer text-xs font-semibold text-blue-700 hover:text-blue-800">
+                  Vis mer
+                </summary>
+                <ul className="mt-2 list-disc space-y-1 pl-5">
+                  {kortForklart.slice(1).map((i) => (
+                    <li key={i.label}>
+                      <span className="font-semibold">{i.label}:</span> {i.text}
+                    </li>
+                  ))}
+                </ul>
+              </details>
             </AnimatedCard>
           </div>
         </div>

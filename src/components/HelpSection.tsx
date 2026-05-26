@@ -2,6 +2,7 @@ import Container from "./Container";
 import SectionTitle from "./SectionTitle";
 import { motion, useReducedMotion } from "framer-motion";
 import { FileText, Phone, ShieldAlert, Trash2, UserRoundCheck } from "lucide-react";
+import CollapsibleText from "./CollapsibleText";
 
 const steps = [
   {
@@ -28,6 +29,22 @@ const steps = [
 
 export default function HelpSection() {
   const reduceMotion = useReducedMotion();
+  const sextortionTips = [
+    "Ikke betal. Ikke send flere bilder.",
+    "Ta skjermbilder og lagre bevis (brukernavn, lenker, tidspunkt).",
+    "Blokker kontoen og rapporter i appen.",
+    "Snakk med en trygg voksen eller kontakt politiet på 02800.",
+    "Politiet ser ofte at betaling ikke stopper truslene – kontakt heller 02800 tidlig."
+  ];
+  const protectTips = [
+    "Bruk 2FA på e‑post og sosiale medier.",
+    "Oppdater telefon og apper.",
+    "Vær skeptisk til lenker fra meldinger.",
+    "Gi færrest mulig tillatelser.",
+    "Slå av «ukjente kan sende meldinger» der det er mulig.",
+    "Rapporter og blokker kontoer som presser deg.",
+    "Snakk med venner om å ikke dele andres bilder – det er også ditt ansvar."
+  ];
 
   return (
     <section id="help" className="border-t border-slate-200 bg-white">
@@ -37,7 +54,12 @@ export default function HelpSection() {
             <SectionTitle
               eyebrow="Hjelp og neste steg"
               title="Hva gjør du hvis du er lurt, utpresset eller har delt noe du angrer på?"
-              description="Følg stegene under i rekkefølge. Du har ikke gjort noe galt ved å be om hjelp. Ved akutt fare: ring 112."
+              description={
+                <CollapsibleText lines={2} className="text-sm leading-relaxed text-slate-700">
+                  Følg stegene under i rekkefølge. Du har ikke gjort noe galt ved å be om hjelp. Ved
+                  akutt fare: ring 112.
+                </CollapsibleText>
+              }
             />
 
             <div className="w-full max-w-xl rounded-sm border border-slate-200 bg-white p-6">
@@ -59,12 +81,12 @@ export default function HelpSection() {
                 </a>
               </div>
 
-              <div className="mt-4 text-sm leading-relaxed text-slate-700">
+              <CollapsibleText lines={3} className="mt-4 text-sm leading-relaxed text-slate-700">
                 <span className="font-semibold">02800</span> – veiledning, anmeldelse og spørsmål om
                 nettkriminalitet. <span className="font-semibold">112</span> – når du er i fare eller
                 noen truer deg fysisk. Vil du ikke ringe: vis denne siden til en lærer, helsesykepleier,
                 forelder eller annen voksen du stoler på.
-              </div>
+              </CollapsibleText>
             </div>
           </div>
 
@@ -85,7 +107,9 @@ export default function HelpSection() {
               >
                 <s.icon className="h-5 w-5 text-blue-700" />
                 <div className="mt-3 text-sm font-semibold text-slate-900">{s.title}</div>
-                <div className="mt-2 text-sm leading-relaxed text-slate-700">{s.text}</div>
+                <CollapsibleText lines={3} className="mt-2 text-sm leading-relaxed text-slate-700">
+                  {s.text}
+                </CollapsibleText>
               </motion.div>
             ))}
           </div>
@@ -94,29 +118,39 @@ export default function HelpSection() {
             <div className="rounded-sm border border-slate-200 bg-slate-50 p-6 text-sm text-slate-700">
               <div className="font-semibold text-slate-900">Hvis noen prøver sextortion</div>
               <ul className="mt-2 list-disc space-y-1 pl-5">
-                <li>Ikke betal. Ikke send flere bilder.</li>
-                <li>Ta skjermbilder og lagre bevis (brukernavn, lenker, tidspunkt).</li>
-                <li>Blokker kontoen og rapporter i appen.</li>
-                <li>Snakk med en trygg voksen eller kontakt politiet på 02800.</li>
-                <li>
-                  Politiet ser ofte at betaling ikke stopper truslene – kontakt heller 02800 tidlig.
-                </li>
+                {sextortionTips.slice(0, 3).map((t) => (
+                  <li key={t}>{t}</li>
+                ))}
               </ul>
+              <details className="mt-2">
+                <summary className="cursor-pointer text-xs font-semibold text-blue-700 hover:text-blue-800">
+                  Vis flere tips
+                </summary>
+                <ul className="mt-2 list-disc space-y-1 pl-5">
+                  {sextortionTips.slice(3).map((t) => (
+                    <li key={t}>{t}</li>
+                  ))}
+                </ul>
+              </details>
             </div>
 
             <div className="rounded-sm border border-slate-200 bg-slate-50 p-6 text-sm text-slate-700">
               <div className="font-semibold text-slate-900">Slik beskytter du deg</div>
               <ul className="mt-2 list-disc space-y-1 pl-5">
-                <li>Bruk 2FA på e‑post og sosiale medier.</li>
-                <li>Oppdater telefon og apper.</li>
-                <li>Vær skeptisk til lenker fra meldinger.</li>
-                <li>Gi færrest mulig tillatelser.</li>
-                <li>Slå av «ukjente kan sende meldinger» der det er mulig.</li>
-                <li>Rapporter og blokker kontoer som presser deg.</li>
-                <li>
-                  Snakk med venner om å ikke dele andres bilder – det er også ditt ansvar.
-                </li>
+                {protectTips.slice(0, 4).map((t) => (
+                  <li key={t}>{t}</li>
+                ))}
               </ul>
+              <details className="mt-2">
+                <summary className="cursor-pointer text-xs font-semibold text-blue-700 hover:text-blue-800">
+                  Vis flere tips
+                </summary>
+                <ul className="mt-2 list-disc space-y-1 pl-5">
+                  {protectTips.slice(4).map((t) => (
+                    <li key={t}>{t}</li>
+                  ))}
+                </ul>
+              </details>
             </div>
           </div>
         </div>

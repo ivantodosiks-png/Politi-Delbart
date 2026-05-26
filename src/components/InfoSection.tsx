@@ -3,6 +3,7 @@ import Container from "./Container";
 import FadeIn from "./motion/FadeIn";
 import { motion, useReducedMotion } from "framer-motion";
 import { Ban, FileWarning, Link2, ShieldCheck, TriangleAlert } from "lucide-react";
+import CollapsibleText from "./CollapsibleText";
 
 const points = [
   {
@@ -34,6 +35,12 @@ const points = [
 
 export default function InfoSection() {
   const reduceMotion = useReducedMotion();
+  const redFlags = [
+    "Meldinger med panikk: «HASTER!!!», «ER DETTE DEG!?», «slett innen 10 min».",
+    "Domener som ligner kjente tjenester, men med ekstra ord eller rare tegn (f.eks. snap-profile-story.net).",
+    "Forespørsler om bilder, kamera, mikrofon eller «bekreft konto» uten tydelig grunn.",
+    "Trusler, skam, krav om penger, Vipps eller «flere bilder hvis ikke…»."
+  ];
 
   return (
     <section id="campaign" className="border-t border-slate-200 bg-white">
@@ -42,7 +49,12 @@ export default function InfoSection() {
           <SectionTitle
             eyebrow="Digital trygghet"
             title="Slik beskytter du deg – og andre"
-            description="Kampanjen Delbart handler om samtykke, falske lenker og digital utpressing. Her får du fem konkrete prinsipper du kan bruke i hverdagen – før noe skjer."
+            description={
+              <CollapsibleText lines={2} className="text-sm leading-relaxed text-slate-700">
+                Kampanjen Delbart handler om samtykke, falske lenker og digital utpressing. Her får du
+                fem konkrete prinsipper du kan bruke i hverdagen – før noe skjer.
+              </CollapsibleText>
+            }
           />
 
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
@@ -62,7 +74,9 @@ export default function InfoSection() {
               >
                 <p.icon className="h-5 w-5 text-blue-700" />
                 <div className="mt-3 text-sm font-semibold text-slate-900">{p.title}</div>
-                <div className="mt-2 text-sm leading-relaxed text-slate-700">{p.text}</div>
+                <CollapsibleText lines={3} className="mt-2 text-sm leading-relaxed text-slate-700">
+                  {p.text}
+                </CollapsibleText>
               </motion.div>
             ))}
           </div>
@@ -70,16 +84,20 @@ export default function InfoSection() {
           <FadeIn className="mt-10 rounded-sm border border-slate-200 bg-slate-50 p-6 text-sm text-slate-700">
             <div className="font-semibold text-slate-900">Røde flagg – stopp før du klikker</div>
             <ul className="mt-2 list-disc space-y-1 pl-5">
-              <li>Meldinger med panikk: «HASTER!!!», «ER DETTE DEG!?», «slett innen 10 min».</li>
-              <li>
-                Domener som ligner kjente tjenester, men med ekstra ord eller rare tegn (f.eks.{" "}
-                <span className="font-mono text-xs">snap-profile-story.net</span>).
-              </li>
-              <li>
-                Forespørsler om bilder, kamera, mikrofon eller «bekreft konto» uten tydelig grunn.
-              </li>
-              <li>Trusler, skam, krav om penger, Vipps eller «flere bilder hvis ikke…».</li>
+              {redFlags.slice(0, 2).map((t) => (
+                <li key={t}>{t}</li>
+              ))}
             </ul>
+            <details className="mt-2">
+              <summary className="cursor-pointer text-xs font-semibold text-blue-700 hover:text-blue-800">
+                Vis alle røde flagg
+              </summary>
+              <ul className="mt-2 list-disc space-y-1 pl-5">
+                {redFlags.slice(2).map((t) => (
+                  <li key={t}>{t}</li>
+                ))}
+              </ul>
+            </details>
           </FadeIn>
         </div>
       </Container>
