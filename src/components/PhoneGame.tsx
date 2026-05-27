@@ -73,33 +73,6 @@ function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
 
-function useSound() {
-  const enabledRef = useRef(false);
-  const audioRef = useRef<Record<string, HTMLAudioElement>>({});
-
-  function setEnabled(v: boolean) {
-    enabledRef.current = v;
-  }
-
-  function prime(src: string) {
-    if (audioRef.current[src]) return;
-    const a = new Audio(src);
-    a.preload = "auto";
-    audioRef.current[src] = a;
-  }
-
-  function play(src: string, volume = 0.6) {
-    if (!enabledRef.current) return;
-    const a = audioRef.current[src] ?? new Audio(src);
-    audioRef.current[src] = a;
-    a.volume = volume;
-    a.currentTime = 0;
-    a.play().catch(() => {});
-  }
-
-  return { setEnabled, prime, play };
-}
-
 function PhoneFrame({ children }: { children: React.ReactNode }) {
   return (
     <div className="w-full max-w-[460px] rounded-[46px] border border-slate-200 bg-white p-3 shadow-sm">
@@ -679,9 +652,6 @@ export default function PhoneGame({
   onOpenChange: (v: boolean) => void;
 }) {
   const reduceMotion = useReducedMotion();
-  const { setEnabled, prime, play } = useSound();
-
-  const [sound, setSound] = useState(false);
   const [screen, setScreen] = useState<Screen>("inbox");
   const [phase, setPhase] = useState<Phase>("idle");
   const [typing, setTyping] = useState(false);
@@ -702,14 +672,6 @@ export default function PhoneGame({
   const reactions = useMemo(() => ["😂", "😳", "💀", "🔥", "👀", "😡"], []);
   const [floaters, setFloaters] = useState<Array<{ id: string; x: number; y: number; t: string }>>([]);
 
-  useEffect(() => setEnabled(sound), [sound, setEnabled]);
-
-  useEffect(() => {
-    // sound placeholders (files can be added later)
-    prime("/sfx/notification.mp3");
-    prime("/sfx/warning.mp3");
-    prime("/sfx/success.mp3");
-  }, [prime]);
 
   function closeExperience() {
     onOpenChange(false);
@@ -795,7 +757,6 @@ export default function PhoneGame({
         interactive: true
       }
     ]);
-    play("/sfx/notification.mp3", 0.45);
   }
 
   function backToInbox() {
@@ -819,14 +780,13 @@ export default function PhoneGame({
     const t1 = window.setTimeout(() => setTyping(false), 900);
     const t2 = window.setTimeout(() => {
       pushMsg({ id: uid(), kind: "text", side: "friend", text: "Trykk på linken fort 😅" });
-      play("/sfx/notification.mp3", 0.45);
     }, 1200);
     return () => {
       window.clearTimeout(t1);
       window.clearTimeout(t2);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, phase, play, screen]);
+  }, [open, phase, screen]);
 
   function openSnapFlow() {
     setSnapLocked(true);
@@ -834,7 +794,6 @@ export default function PhoneGame({
     lockConfirmSnap();
     pushMsg({ id: uid(), kind: "text", side: "me", text: "Åpner lenken…" });
     setScreen("fake_site");
-    play("/sfx/notification.mp3", 0.35);
   }
 
   function ignoreSnapFlow() {
@@ -867,14 +826,12 @@ export default function PhoneGame({
           title: "BRO ER DETTE DEG!!!?? 😭💀\nSjekk denne…",
           urlText: "snap-profile-story.net"
         });
-        play("/sfx/notification.mp3", 1);
       }, 1400);
     }, 800);
   }
 
   function ignoreSnapConfirm() {
     lockConfirmSnap();
-    play("/sfx/success.mp3", 0.45);
     pushMsg({ id: uid(), kind: "text", side: "me", text: "Ja. Jeg ignorerer." });
     setLearnOutcome("good");
     setPhase("friend_angry");
@@ -885,14 +842,12 @@ export default function PhoneGame({
   }
 
   function denyAccess() {
-    play("/sfx/success.mp3", 0.5);
     setScreen("thread");
     pushMsg({ id: uid(), kind: "text", side: "me", text: "Nei – ikke gi tilgang." });
     setPhase("friend_angry");
   }
 
   function allowAccess() {
-    play("/sfx/warning.mp3", 0.6);
     setPhase("allow_loading");
     pushMsg({ id: uid(), kind: "text", side: "me", text: "Tillater tilgang til bilder…" });
   }
@@ -946,7 +901,6 @@ export default function PhoneGame({
         side: "friend",
         text: "Dra til helvete da 🙄"
       });
-      play("/sfx/warning.mp3", 0.4);
     }, 3500);
 
     const t6 = window.setTimeout(() => {
@@ -983,7 +937,6 @@ export default function PhoneGame({
         side: "attacker",
         text: "Haha 😂 Vi har bildene dine nå."
       });
-      play("/sfx/warning.mp3", 0.55);
     }, 650);
 
     const t2 = window.setTimeout(() => setTyping(true), 1100);
@@ -997,7 +950,6 @@ export default function PhoneGame({
         count: 6,
         caption: "Er dette deg?? 😂"
       });
-      play("/sfx/warning.mp3", 0.55);
 
       if (!reduceMotion) {
         const rx = clamp(Math.random(), 0.12, 0.88);
@@ -1025,7 +977,6 @@ export default function PhoneGame({
         side: "attacker",
         text: "Jeg sender dette til ALLE i klassen med mindre du gjør som jeg sier 😈"
       });
-      play("/sfx/warning.mp3", 0.55);
       if (!reduceMotion) setStress((s) => (s + 1) % 4);
     }, 3100);
 
@@ -1093,15 +1044,6 @@ export default function PhoneGame({
             >
               Start øvelsen
             </button>
-            <label className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 hover:bg-slate-50">
-              <input
-                type="checkbox"
-                className="accent-blue-700"
-                checked={sound}
-                onChange={(e) => setSound(e.target.checked)}
-              />
-              Lydeffekter
-            </label>
           </div>
         </div>
       </Container>

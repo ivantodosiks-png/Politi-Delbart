@@ -8,21 +8,15 @@ import CasesSection from "./components/CasesSection";
 import PhoneGame from "./components/PhoneGame";
 import FaqSection from "./components/FaqSection";
 import HelpSection from "./components/HelpSection";
-import CtaSection from "./components/CtaSection";
 import Footer from "./components/Footer";
 import { useState } from "react";
 
 export default function App() {
   const [experienceOpen, setExperienceOpen] = useState(false);
 
-  function startExperience() {
-    document.getElementById("experience")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    window.setTimeout(() => setExperienceOpen(true), 150);
-  }
-
   return (
     <div className="min-h-dvh">
-      <Header onStartExperience={startExperience} />
+      <Header />
       <main>
         <Hero />
         <ProcessSection />
@@ -33,7 +27,6 @@ export default function App() {
         <PhoneGame open={experienceOpen} onOpenChange={setExperienceOpen} />
         <FaqSection />
         <HelpSection />
-        <CtaSection onStartExperience={startExperience} />
       </main>
       <Footer />
     </div>

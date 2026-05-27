@@ -3,7 +3,7 @@ import logoPolice from "../assets/logo-police.webp";
 import { motion, useReducedMotion } from "framer-motion";
 import { easeOut, fadeUp } from "../lib/motion";
 
-export default function Header({ onStartExperience }: { onStartExperience: () => void }) {
+export default function Header() {
   const reduceMotion = useReducedMotion();
 
   return (
@@ -21,24 +21,8 @@ export default function Header({ onStartExperience }: { onStartExperience: () =>
             whileHover={reduceMotion ? undefined : { scale: 1.02 }}
             transition={{ duration: 0.2 }}
           >
-            <img
-              src={logoPolice}
-              alt="Politiet"
-              className="h-14 w-auto sm:h-16"
-              loading="eager"
-            />
+            <img src={logoPolice} alt="Politiet" className="h-14 w-auto sm:h-16" loading="eager" />
           </motion.a>
-
-          <motion.button
-            type="button"
-            onClick={onStartExperience}
-            whileHover={reduceMotion ? undefined : { scale: 1.03, y: -1 }}
-            whileTap={reduceMotion ? undefined : { scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 420, damping: 22 }}
-            className="btn-pulse-ring rounded-full bg-blue-700 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800"
-          >
-            Prøv scenarioet
-          </motion.button>
         </div>
       </Container>
     </motion.header>
