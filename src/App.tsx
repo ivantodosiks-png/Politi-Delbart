@@ -1,5 +1,6 @@
 import Header from "./components/Header";
 import Hero from "./components/Hero";
+import VideoSection from "./components/VideoSection";
 import ProcessSection from "./components/ProcessSection";
 import InfoSection from "./components/InfoSection";
 import BenefitsSection from "./components/BenefitsSection";
@@ -19,6 +20,7 @@ export default function App() {
       <Header />
       <main>
         <Hero />
+        <VideoSection />
         <ProcessSection />
         <InfoSection />
         <BenefitsSection />

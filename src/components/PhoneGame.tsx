@@ -1,4 +1,4 @@
-import Container from "./Container";
+﻿import Container from "./Container";
 import SectionTitle from "./SectionTitle";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
@@ -116,7 +116,7 @@ function SafetyMeter({ value }: { value: number }) {
         <div className={`h-full ${tone}`} style={{ width: `${pct}%` }} />
       </div>
       <div className="mt-2 text-[11px] text-slate-600">
-        Trygghetsscore: hvert risikovalg senker scoren. I virkeligheten finnes ingen «poeng» – bare
+        Trygghetsscore: hvert risikovalg senker scoren. I virkeligheten finnes ingen В«poengВ» вЂ“ bare
         konsekvenser.
       </div>
     </div>
@@ -183,6 +183,9 @@ function MessageBubble({
     return (
       <div className="flex justify-center">
         <div className="inline-flex items-center gap-2 rounded-full border border-black/5 bg-slate-50 px-3 py-1.5 text-[12px] text-slate-700">
+          <div className="shrink-0">
+            <Avatar seed={0} />
+          </div>
           <Sparkles className="h-4 w-4 text-slate-500" />
           {msg.text}
         </div>
@@ -195,7 +198,12 @@ function MessageBubble({
   const showAvatar = true;
   const avatarSeed =
     msg.side === "friend" ? friendSeed : msg.side === "attacker" ? attackerSeed : meSeed;
-  const label = msg.side === "friend" ? friendLabel : attackerLabel;
+  const label =
+    msg.side === "friend"
+      ? friendLabel
+      : msg.side === "attacker"
+        ? attackerLabel
+        : "Du";
 
   return (
     <div className={`flex ${align}`}>
@@ -220,7 +228,7 @@ function MessageBubble({
             <div className="text-sm font-semibold text-slate-900">{label}</div>
             {msg.kind === "snap_confirm" ? (
               <p className="mt-2 text-[13px] font-medium text-amber-800">
-                Er du sikker på at du vil ignorere?
+                Er du sikker pГҐ at du vil ignorere?
               </p>
             ) : null}
             <div className="mt-2 whitespace-pre-line text-[15px] leading-relaxed text-slate-900">
@@ -245,12 +253,12 @@ function MessageBubble({
                 loading="lazy"
               />
               <div className="border-t border-black/5 bg-white px-3 py-2 text-[12px] text-slate-600">
-                Trykk «Åpne» for å se
+                Trykk В«Г…pneВ» for ГҐ se
               </div>
             </div>
 
             {msg.kind === "snap" && snapLocked ? (
-              <div className="mt-3 text-center text-[12px] font-medium text-slate-500">Lenke åpnet</div>
+              <div className="mt-3 text-center text-[12px] font-medium text-slate-500">Lenke ГҐpnet</div>
             ) : msg.kind === "snap" && msg.interactive === false ? (
               <div className="mt-3 text-center text-[12px] font-medium text-slate-500">Ignorert</div>
             ) : msg.kind === "snap_confirm" && msg.answered ? (
@@ -269,7 +277,7 @@ function MessageBubble({
                   onClick={onOpenSnap}
                   className="rounded-2xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-500"
                 >
-                  Åpne lenke
+                  Г…pne lenke
                 </button>
               </div>
             )}
@@ -374,9 +382,9 @@ function VerdictScreen({
       : "Smart valg!";
 
   const summary = isBad
-    ? "Du ga tilgang til bilder på en ukjent side. I chatten kom trusler og press – slik starter mange saker med utpressing."
+    ? "Du ga tilgang til bilder pГҐ en ukjent side. I chatten kom trusler og press вЂ“ slik starter mange saker med utpressing."
     : outcome === "good"
-      ? "Du sa nei til tilgang. Vennen ble sint – det kan være manipulering. Du stoppet det før det ble verre."
+      ? "Du sa nei til tilgang. Vennen ble sint вЂ“ det kan vГ¦re manipulering. Du stoppet det fГёr det ble verre."
       : "Du åpnet ikke den mistenkelige lenken. Det er ofte det tryggeste du kan gjøre.";
 
   return (
@@ -419,7 +427,7 @@ function VerdictScreen({
         >
           Fortsett
         </button>
-        <p className="mt-3 text-[11px] text-white/55">Trykk for å se hva som skjedde og hva du kan gjøre</p>
+        <p className="mt-3 text-[11px] text-white/55">Trykk for ГҐ se hva som skjedde og hva du kan gjГёre</p>
       </motion.div>
     </motion.div>
   );
@@ -441,49 +449,49 @@ function ExplainScreen({
   const steps =
     outcome === "bad"
       ? [
-          { t: "1", title: "Du klikket på en ukjent lenke", body: "En falsk «story»-side etterlignet en kjent app." },
+          { t: "1", title: "Du klikket pГҐ en ukjent lenke", body: "En falsk В«storyВ»-side etterlignet en kjent app." },
           {
             t: "2",
             title: "Du ga tilgang til bilder",
-            body: "Med «Tillat» kan angripere hente eller kopiere innhold fra telefonen din."
+            body: "Med В«TillatВ» kan angripere hente eller kopiere innhold fra telefonen din."
           },
           {
             t: "3",
             title: "Press og trusler i chat",
-            body: "Ukjente kontoer bruker skam, latter og trusler om å dele til alle – dette er sextortion."
+            body: "Ukjente kontoer bruker skam, latter og trusler om ГҐ dele til alle вЂ“ dette er sextortion."
           },
           {
-            t: "→",
-            title: "Dette kan føre til",
-            body: "Utpressing, rykter, stress, deling i klassen – og i alvorlige tilfeller politietterforskning."
+            t: "в†’",
+            title: "Dette kan fГёre til",
+            body: "Utpressing, rykter, stress, deling i klassen вЂ“ og i alvorlige tilfeller politietterforskning."
           }
         ]
       : outcome === "good"
         ? [
             {
-              t: "✓",
+              t: "вњ“",
               title: "Du sa nei til tilgang",
-              body: "Du stoppet angrepet før ukjente fikk bildene dine."
+              body: "Du stoppet angrepet fГёr ukjente fikk bildene dine."
             },
             {
               t: "!",
               title: "Vennen ble sint",
-              body: "Manipulering kan se ut som vennskapelig press – «stol på meg», «haster»."
+              body: "Manipulering kan se ut som vennskapelig press вЂ“ В«stol pГҐ megВ», В«hasterВ»."
             },
             {
-              t: "→",
+              t: "в†’",
               title: "I virkeligheten",
-              body: "Sinthet og banning er også et rødt flagg. Snakk med en voksen hvis noen presser deg."
+              body: "Sinthet og banning er ogsГҐ et rГёdt flagg. Snakk med en voksen hvis noen presser deg."
             }
           ]
         : [
             {
-              t: "✓",
+              t: "вњ“",
               title: "Du åpnet ikke lenken",
-              body: "Det er ofte det tryggeste når meldingen virker stressende eller uvanlig."
+              body: "Det er ofte det tryggeste nГҐr meldingen virker stressende eller uvanlig."
             },
             {
-              t: "→",
+              t: "в†’",
               title: "Husk",
               body: "Sjekk alltid avsender og domene. Ved tvil: vis meldingen til en voksen eller ring 02800."
             }
@@ -506,19 +514,19 @@ function ExplainScreen({
           transition={{ duration: 0.45 }}
         >
           <p className="text-xs font-semibold uppercase tracking-wider text-sky-300">
-            Dette skjedde nå
+            Dette skjedde nГҐ
           </p>
           <h3 className="mt-2 text-2xl font-semibold leading-tight">
             {isBad
               ? "Slik kan ett klikk bli utpressing"
               : outcome === "good"
-                ? "Du stoppet det – men presset var reelt"
+                ? "Du stoppet det вЂ“ men presset var reelt"
                 : "Smart valg i chatten"}
           </h3>
           <p className="mt-3 text-sm leading-relaxed text-white/75">
             {isBad
               ? "Dette er en simulering. I virkeligheten kan konsekvensene bli alvorlige og vare lenge."
-              : "Dette er en simulering – men mønstrene er ekte. Slik gjenkjenner du dem neste gang."}
+              : "Dette er en simulering вЂ“ men mГёnstrene er ekte. Slik gjenkjenner du dem neste gang."}
           </p>
         </motion.div>
 
@@ -582,7 +590,7 @@ function ExplainScreen({
             onClick={onTryAgain}
             className="rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-500"
           >
-            Prøv igjen
+            PrГёv igjen
           </button>
           <button
             type="button"
@@ -616,13 +624,13 @@ function FakeSite({
         <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
           <div className="text-sm font-semibold">Se story</div>
           <div className="mt-2 text-xs leading-relaxed text-white/70">
-            Denne siden etterligner en kjent tjeneste. Sjekk alltid domenet før du trykker «Åpne».
+            Denne siden etterligner en kjent tjeneste. Sjekk alltid domenet fГёr du trykker В«Г…pneВ».
           </div>
 
           <div className="mt-4 overflow-hidden rounded-2xl ring-1 ring-white/10">
             <img
               src="/istoria.png"
-              alt="Forhåndsvisning av story"
+              alt="ForhГҐndsvisning av story"
               className="h-44 w-full object-cover blur-[7px] saturate-75 opacity-90"
               loading="lazy"
             />
@@ -636,7 +644,7 @@ function FakeSite({
             onClick={onRequestPhotos}
             className="mt-5 w-full rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-500"
           >
-            Åpne
+            Г…pne
           </button>
         </div>
       </div>
@@ -669,7 +677,7 @@ export default function PhoneGame({
   const [stress, setStress] = useState(0);
   const [galleryFx, setGalleryFx] = useState<Array<{ id: string; x: number; y: number; d: number }>>([]);
 
-  const reactions = useMemo(() => ["😂", "😳", "💀", "🔥", "👀", "😡"], []);
+  const reactions = useMemo(() => ["рџ‚", "рџі", "рџ’Ђ", "рџ”Ґ", "рџ‘Ђ", "рџЎ"], []);
   const [floaters, setFloaters] = useState<Array<{ id: string; x: number; y: number; t: string }>>([]);
 
 
@@ -752,7 +760,7 @@ export default function PhoneGame({
         id: uid(),
         kind: "snap",
         side: "friend",
-        title: "BRO ER DETTE DEG!!!?? 😭💀\nSjekk denne…",
+        title: "BRO ER DETTE DEG!!!?? рџ­рџ’Ђ\nSjekk denneвЂ¦",
         urlText: "snap-profile-story.net",
         interactive: true
       }
@@ -779,7 +787,7 @@ export default function PhoneGame({
     setTyping(true);
     const t1 = window.setTimeout(() => setTyping(false), 900);
     const t2 = window.setTimeout(() => {
-      pushMsg({ id: uid(), kind: "text", side: "friend", text: "Trykk på linken fort 😅" });
+      pushMsg({ id: uid(), kind: "text", side: "friend", text: "Trykk pГҐ linken fort рџ…" });
     }, 1200);
     return () => {
       window.clearTimeout(t1);
@@ -798,7 +806,7 @@ export default function PhoneGame({
 
   function ignoreSnapFlow() {
     lockSnapMessages();
-    pushMsg({ id: uid(), kind: "text", side: "me", text: "Nei, jeg åpner ikke den." });
+    pushMsg({ id: uid(), kind: "text", side: "me", text: "Nei, jeg ГҐpner ikke den." });
     setTyping(true);
     window.setTimeout(() => {
       setTyping(false);
@@ -806,7 +814,7 @@ export default function PhoneGame({
         id: uid(),
         kind: "text",
         side: "friend",
-        text: "Hæ?? Det tar 2 sek. Tro meg da 🙄"
+        text: "HГ¦?? Det tar 2 sek. Tro meg da рџ™„"
       });
       window.setTimeout(() => {
         setTyping(true);
@@ -817,13 +825,13 @@ export default function PhoneGame({
           id: uid(),
           kind: "text",
           side: "friend",
-          text: "Seriøst – du må bare sjekke. Er du sikker på at du vil ignorere?"
+          text: "SeriГёst вЂ“ du mГҐ bare sjekke. Er du sikker pГҐ at du vil ignorere?"
         });
         pushMsg({
           id: uid(),
           kind: "snap_confirm",
           side: "friend",
-          title: "BRO ER DETTE DEG!!!?? 😭💀\nSjekk denne…",
+          title: "BRO ER DETTE DEG!!!?? рџ­рџ’Ђ\nSjekk denneвЂ¦",
           urlText: "snap-profile-story.net"
         });
       }, 1400);
@@ -843,7 +851,7 @@ export default function PhoneGame({
 
   function denyAccess() {
     setScreen("thread");
-    pushMsg({ id: uid(), kind: "text", side: "me", text: "Nei – ikke gi tilgang." });
+    pushMsg({ id: uid(), kind: "text", side: "me", text: "Nei вЂ“ ikke gi tilgang." });
     setPhase("friend_angry");
   }
 
@@ -875,7 +883,7 @@ export default function PhoneGame({
         id: uid(),
         kind: "text",
         side: "friend",
-        text: "Hæ?? Var det ikke DU som ba meg sende den?? 😤"
+        text: "HГ¦?? Var det ikke DU som ba meg sende den?? рџ¤"
       });
     }, 700);
 
@@ -887,7 +895,7 @@ export default function PhoneGame({
         id: uid(),
         kind: "text",
         side: "friend",
-        text: "Du stoler jo ikke på meg engang. Whatever."
+        text: "Du stoler jo ikke pГҐ meg engang. Whatever."
       });
     }, 2100);
 
@@ -899,7 +907,7 @@ export default function PhoneGame({
         id: uid(),
         kind: "text",
         side: "friend",
-        text: "Dra til helvete da 🙄"
+        text: "Dra til helvete da рџ™„"
       });
     }, 3500);
 
@@ -935,7 +943,7 @@ export default function PhoneGame({
         id: uid(),
         kind: "text",
         side: "attacker",
-        text: "Haha 😂 Vi har bildene dine nå."
+        text: "Haha рџ‚ Vi har bildene dine nГҐ."
       });
     }, 650);
 
@@ -948,7 +956,7 @@ export default function PhoneGame({
         kind: "gallery",
         side: "attacker",
         count: 6,
-        caption: "Er dette deg?? 😂"
+        caption: "Er dette deg?? рџ‚"
       });
 
       if (!reduceMotion) {
@@ -975,7 +983,7 @@ export default function PhoneGame({
         id: uid(),
         kind: "text",
         side: "attacker",
-        text: "Jeg sender dette til ALLE i klassen med mindre du gjør som jeg sier 😈"
+        text: "Jeg sender dette til ALLE i klassen med mindre du gjГёr som jeg sier рџ€"
       });
       if (!reduceMotion) setStress((s) => (s + 1) % 4);
     }, 3100);
@@ -1019,9 +1027,9 @@ export default function PhoneGame({
 
   const inboxNames = useMemo(
     () => [
-      { name: "Maja", sub: "Mottatt • 8 t" },
-      { name: "Noah", sub: "Mottatt • 1 m" },
-      { name: "Linnea", sub: "Åpnet • 2 t" }
+      { name: "Maja", sub: "Mottatt вЂў 8 t" },
+      { name: "Noah", sub: "Mottatt вЂў 1 m" },
+      { name: "Linnea", sub: "Г…pnet вЂў 2 t" }
     ],
     []
   );
@@ -1031,9 +1039,9 @@ export default function PhoneGame({
       <Container>
         <div className="py-12 sm:py-14">
           <SectionTitle
-            eyebrow="Interaktiv øvelse"
-            title="Opplev phishing og sextortion – trygt"
-            description="Et kort, fiktivt scenario i en chat-app. Du velger selv: ignorere, åpne eller gi tillatelse. Ingen ekte data samles inn – målet er å lære mønstrene før det skjer på ekte."
+            eyebrow="Interaktiv Гёvelse"
+            title="Opplev phishing og sextortion вЂ“ trygt"
+            description="Et kort, fiktivt scenario i en chat-app. Du velger selv: ignorere, ГҐpne eller gi tillatelse. Ingen ekte data samles inn вЂ“ mГҐlet er ГҐ lГ¦re mГёnstrene fГёr det skjer pГҐ ekte."
           />
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -1042,7 +1050,7 @@ export default function PhoneGame({
               onClick={openExperience}
               className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-700 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800"
             >
-              Start øvelsen
+              Start Гёvelsen
             </button>
           </div>
         </div>
@@ -1090,7 +1098,7 @@ export default function PhoneGame({
                         <button
                           type="button"
                           className="grid h-10 w-10 place-items-center rounded-full bg-slate-100 hover:bg-slate-200"
-                          aria-label="Søk"
+                          aria-label="SГёk"
                         >
                           <Search className="h-5 w-5" />
                         </button>
@@ -1126,7 +1134,7 @@ export default function PhoneGame({
                               {chatPartner === "friend" ? friendName : attackerName}
                             </div>
                             <div className="mt-0.5 text-[11px] text-slate-500">
-                              {typing ? "skriver…" : chatPartner === "attacker" ? "ukjent" : "i dag"}
+                              {typing ? "skriverвЂ¦" : chatPartner === "attacker" ? "ukjent" : "i dag"}
                             </div>
                           </div>
                         </div>
@@ -1150,7 +1158,7 @@ export default function PhoneGame({
                   <div className="absolute inset-0 bg-white pt-[200px]">
                     <div className="sticky top-[200px] z-0 px-4 pb-3">
                       <div className="flex gap-6 overflow-auto text-sm font-semibold text-slate-700">
-                        {["Nær meg", "Samtaler", "Grupper", "Svar", "Bestevenner"].map((t) => (
+                        {["NГ¦r meg", "Samtaler", "Grupper", "Svar", "Bestevenner"].map((t) => (
                           <div key={t} className="whitespace-nowrap">
                             {t}
                           </div>
@@ -1190,7 +1198,7 @@ export default function PhoneGame({
                             <span className="h-2 w-2 rounded-full bg-rose-500" />
                           </div>
                           <div className="mt-0.5 truncate text-[12px] text-slate-600">
-                            Nytt snap • nå
+                            Nytt snap вЂў nГҐ
                           </div>
                         </div>
                         <div className="text-[12px] font-semibold text-rose-600">New</div>
@@ -1203,7 +1211,7 @@ export default function PhoneGame({
                   <>
                     {chatPartner === "friend" && phase === "act1" ? (
                       <div className="absolute inset-x-0 top-[200px] border-b border-black/5 bg-slate-50 px-4 py-2 text-[12px] text-slate-600">
-                        Ikke gå glipp av chats fra {friendName}!{" "}
+                        Ikke gГҐ glipp av chats fra {friendName}!{" "}
                         <span className="font-semibold text-blue-700">Aktiver varsler</span>
                       </div>
                     ) : null}
@@ -1257,7 +1265,7 @@ export default function PhoneGame({
                     {phase === "chat_await_continue" ? (
                       <div className="absolute inset-x-0 bottom-0 z-20 border-t border-black/5 bg-white px-4 py-4">
                         <p className="mb-3 text-center text-[12px] text-slate-600">
-                          Les meldingene over. Når du er klar, gå videre.
+                          Les meldingene over. NГҐr du er klar, gГҐ videre.
                         </p>
                         <button
                           type="button"
@@ -1305,7 +1313,7 @@ export default function PhoneGame({
                           <div>
                             <div className="text-sm font-semibold">Gi tilgang til bilder?</div>
                             <div className="mt-1 text-xs leading-relaxed text-white/70">
-                              Ukjent side ber om tilgang. Dette er et typisk phishing-mønster – si nei hvis du er
+                              Ukjent side ber om tilgang. Dette er et typisk phishing-mГёnster вЂ“ si nei hvis du er
                               usikker.
                             </div>
                           </div>
@@ -1316,7 +1324,7 @@ export default function PhoneGame({
                             onClick={denyAccess}
                             className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white hover:bg-white/10"
                           >
-                            Avslå
+                            AvslГҐ
                           </button>
                           <button
                             type="button"
@@ -1341,9 +1349,9 @@ export default function PhoneGame({
                       exit={{ opacity: 0 }}
                     >
                       <div className="w-full max-w-[320px] rounded-3xl border border-white/10 bg-white/5 p-6 text-center">
-                        <div className="text-sm font-semibold">Laster…</div>
+                        <div className="text-sm font-semibold">LasterвЂ¦</div>
                         <div className="mt-2 text-xs text-white/70">
-                          Dette er hvordan falske sider kan føles «normale» – mens de ber om tilgang.
+                          Dette er hvordan falske sider kan fГёles В«normaleВ» вЂ“ mens de ber om tilgang.
                         </div>
                         <div className="mt-5 h-2 w-full overflow-hidden rounded-full bg-white/10">
                           <motion.div
@@ -1448,7 +1456,7 @@ export default function PhoneGame({
                   ) : null}
                 </AnimatePresence>
 
-                {/* Verdict – chat skjules, bruker trykker Fortsett */}
+                {/* Verdict вЂ“ chat skjules, bruker trykker Fortsett */}
                 <AnimatePresence>
                   {phase === "verdict" ? (
                     <VerdictScreen
@@ -1478,3 +1486,4 @@ export default function PhoneGame({
     </section>
   );
 }
+

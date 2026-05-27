@@ -2,6 +2,7 @@ import Container from "./Container";
 import SectionTitle from "./SectionTitle";
 import { motion, useReducedMotion } from "framer-motion";
 import { EyeOff, Link2, MessageCircleWarning, Siren, Smartphone, TriangleAlert } from "lucide-react";
+import CollapsibleText from "./CollapsibleText";
 
 const cards = [
   {
@@ -70,7 +71,9 @@ export default function RiskCards() {
                   </div>
                   <div>
                     <div className="text-base font-semibold text-slate-900">{c.title}</div>
-                    <div className="mt-2 text-sm leading-relaxed text-slate-700">{c.text}</div>
+                    <CollapsibleText lines={2} className="mt-2 text-sm leading-relaxed text-slate-700">
+                      {c.text}
+                    </CollapsibleText>
                   </div>
                 </div>
               </motion.div>
@@ -82,10 +85,17 @@ export default function RiskCards() {
             <ol className="mt-2 list-decimal space-y-1 pl-5">
               <li>Kjenner jeg avsenderen – og passer meldingen til dem?</li>
               <li>Er domenet helt riktig (ingen ekstra ord, bindestrek, .net i stedet for .com)?</li>
-              <li>Ber siden om bilder, kamera eller innlogging jeg ikke trenger?</li>
-              <li>Føler jeg meg presset? → Stopp, vis meldingen til en voksen.</li>
-              <li>Hva er verste utfall – og er det verdt risikoen?</li>
             </ol>
+            <details className="mt-2">
+              <summary className="cursor-pointer text-xs font-semibold text-blue-700 hover:text-blue-800">
+                Vis hele sjekklista
+              </summary>
+              <ol className="mt-2 list-decimal space-y-1 pl-5">
+                <li>Ber siden om bilder, kamera eller innlogging jeg ikke trenger?</li>
+                <li>Føler jeg meg presset? → Stopp, vis meldingen til en voksen.</li>
+                <li>Hva er verste utfall – og er det verdt risikoen?</li>
+              </ol>
+            </details>
           </div>
         </div>
       </Container>
