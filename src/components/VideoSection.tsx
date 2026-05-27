@@ -1,4 +1,4 @@
-import Container from "./Container";
+﻿import Container from "./Container";
 import SectionTitle from "./SectionTitle";
 import CollapsibleText from "./CollapsibleText";
 
@@ -18,38 +18,31 @@ export default function VideoSection() {
             }
           />
 
-          <div className="mt-6 rounded-sm border border-slate-200 bg-slate-50 p-4 sm:p-6">
-            <details>
-              <summary className="cursor-pointer text-sm font-semibold text-blue-700 hover:text-blue-800">
-                Se video
-              </summary>
-              <div className="mt-4 overflow-hidden rounded-sm border border-slate-200 bg-white">
-                <div className="aspect-video w-full">
-                  <iframe
-                    className="h-full w-full"
-                    src="https://www.youtube.com/embed/Hj-8cERwRTw"
-                    title="YouTube video player"
-                    loading="lazy"
-                    referrerPolicy="strict-origin-when-cross-origin"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                    allowFullScreen
-                  />
-                </div>
-              </div>
-            </details>
+          <div className="mt-6 overflow-hidden rounded-sm border border-slate-200 bg-white shadow-sm">
+            <div className="aspect-video w-full bg-slate-100">
+              <iframe
+                className="h-full w-full"
+                src="https://www.youtube.com/embed/Hj-8cERwRTw"
+                title="YouTube video player"
+                loading="lazy"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          </div>
 
-            <details className="mt-4">
-              <summary className="cursor-pointer text-xs font-semibold text-blue-700 hover:text-blue-800">
-                Les mer
-              </summary>
-              <div className="mt-3 text-sm leading-relaxed text-slate-700">
-                <p>
-                  Hvis noe føles stressende, uvanlig eller «for godt til å være sant», stopp og sjekk før du klikker.
-                  Snakk med en voksen du stoler på, og ikke gi apper/nettsider tilgang til bilder eller kamera uten
-                  god grunn.
-                </p>
-              </div>
-            </details>
+          <div className="mt-4 rounded-sm border border-slate-200 bg-slate-50 p-5 text-sm text-slate-700">
+            <CollapsibleText lines={3} className="leading-relaxed" moreLabel="Vis mer" lessLabel="Skjul">
+              <p>
+                Ønsker du å holde foredrag for barn og unge om deling av seksualiserte bilder? Undervisningsopplegget
+                «Delbart?» er tilrettelagt slik at lærere, helsesykepleiere, miljøarbeidere, utekontakter og andre
+                voksne som jobber med barn og unge kan holde foredrag.
+              </p>
+              <p className="mt-3">
+                <span className="font-semibold">Laget av:</span> WergelandApenes/Atyp/Ferdi
+              </p>
+            </CollapsibleText>
           </div>
         </div>
       </Container>

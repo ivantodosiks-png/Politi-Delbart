@@ -1,4 +1,4 @@
-import Container from "./Container";
+﻿import Container from "./Container";
 import logoFooter from "../assets/logo-footer.png";
 import FadeIn from "./motion/FadeIn";
 
@@ -30,3 +30,4 @@ export default function Footer() {
     </FadeIn>
   );
 }
+

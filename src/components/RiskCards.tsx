@@ -1,8 +1,7 @@
-import Container from "./Container";
+﻿import Container from "./Container";
 import SectionTitle from "./SectionTitle";
 import { motion, useReducedMotion } from "framer-motion";
 import { EyeOff, Link2, MessageCircleWarning, Siren, Smartphone, TriangleAlert } from "lucide-react";
-import CollapsibleText from "./CollapsibleText";
 
 const cards = [
   {
@@ -71,9 +70,7 @@ export default function RiskCards() {
                   </div>
                   <div>
                     <div className="text-base font-semibold text-slate-900">{c.title}</div>
-                    <CollapsibleText lines={2} className="mt-2 text-sm leading-relaxed text-slate-700">
-                      {c.text}
-                    </CollapsibleText>
+                    <div className="mt-2 text-sm leading-relaxed text-slate-700">{c.text}</div>
                   </div>
                 </div>
               </motion.div>
@@ -102,3 +99,4 @@ export default function RiskCards() {
     </section>
   );
 }
+

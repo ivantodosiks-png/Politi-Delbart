@@ -1,4 +1,4 @@
-import Container from "./Container";
+﻿import Container from "./Container";
 import SectionTitle from "./SectionTitle";
 import { motion, useReducedMotion } from "framer-motion";
 
@@ -59,3 +59,4 @@ export default function BenefitsSection() {
     </section>
   );
 }
+

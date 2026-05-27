@@ -1,4 +1,4 @@
-import Container from "./Container";
+﻿import Container from "./Container";
 import SectionTitle from "./SectionTitle";
 import { motion, useReducedMotion } from "framer-motion";
 import { FileText, Phone, ShieldAlert, Trash2, UserRoundCheck } from "lucide-react";
@@ -158,3 +158,4 @@ export default function HelpSection() {
     </section>
   );
 }
+

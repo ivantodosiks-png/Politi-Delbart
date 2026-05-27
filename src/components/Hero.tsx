@@ -1,4 +1,4 @@
-import Container from "./Container";
+﻿import Container from "./Container";
 import AnimatedCard from "./motion/AnimatedCard";
 import StaggerGrid, { StaggerItem } from "./motion/StaggerGrid";
 import { motion, useReducedMotion } from "framer-motion";
@@ -124,3 +124,4 @@ export default function Hero() {
     </section>
   );
 }
+
