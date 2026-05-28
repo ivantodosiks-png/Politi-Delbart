@@ -18,7 +18,7 @@ export default function VideoSection() {
             }
           />
 
-          <div className="mt-6 overflow-hidden rounded-sm border border-slate-200 bg-white shadow-sm">
+          <div className="mx-auto mt-6 max-w-3xl overflow-hidden rounded-sm border border-slate-200 bg-white shadow-sm">
             <div className="aspect-video w-full bg-slate-100">
               <iframe
                 className="h-full w-full"

@@ -27,7 +27,9 @@ export default function CollapsibleText({
     // Only show the toggle when clamping actually hides content.
     const measure = () => {
       if (expanded) return;
-      setCanExpand(el.scrollHeight > el.clientHeight + 1);
+      const hiddenPx = el.scrollHeight - el.clientHeight;
+      // Avoid showing the toggle when it would reveal only a tiny amount of text.
+      setCanExpand(hiddenPx > 32);
     };
 
     measure();

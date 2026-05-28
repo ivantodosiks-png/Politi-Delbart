@@ -16,7 +16,19 @@ export default function App() {
   const [experienceOpen, setExperienceOpen] = useState(false);
 
   return (
-    <div className="min-h-dvh">
+    <div className="relative min-h-dvh bg-slate-50">
+      {/* Subtle side lines / paper background */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 -z-10"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, rgba(148,163,184,0.22), rgba(148,163,184,0.22)), linear-gradient(to left, rgba(148,163,184,0.22), rgba(148,163,184,0.22))",
+          backgroundSize: "1px 100%, 1px 100%",
+          backgroundPosition: "48px 0, calc(100% - 48px) 0",
+          backgroundRepeat: "no-repeat"
+        }}
+      />
       <Header />
       <main>
         <Hero />

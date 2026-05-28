@@ -17,7 +17,7 @@ export default function Header() {
         <div className="flex h-24 items-center justify-between gap-6">
           <motion.a
             href="#top"
-            className="flex items-center"
+            className="flex items-center rounded-sm bg-white px-2 py-1 shadow-sm ring-1 ring-slate-200"
             whileHover={reduceMotion ? undefined : { scale: 1.02 }}
             transition={{ duration: 0.2 }}
           >
