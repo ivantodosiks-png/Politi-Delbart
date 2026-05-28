@@ -2,9 +2,12 @@ import Container from "./Container";
 import logoPolice from "../assets/logo-police.webp";
 import { motion, useReducedMotion } from "framer-motion";
 import { easeOut, fadeUp } from "../lib/motion";
+import { LANGS, useI18n } from "../i18n/i18n";
 
 export default function Header() {
   const reduceMotion = useReducedMotion();
+  const { lang, setLang, t } = useI18n();
+  const current = LANGS.find((l) => l.lang === lang) ?? LANGS[0]!;
 
   return (
     <motion.header
@@ -29,33 +32,60 @@ export default function Header() {
               href="#experience"
               className="rounded-sm px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-900"
             >
-              Experience
+              {t("nav.experience")}
             </a>
             <a
               href="#cases"
               className="rounded-sm px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-900"
             >
-              Cases
+              {t("nav.cases")}
             </a>
             <a
               href="#risks"
               className="rounded-sm px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-900"
             >
-              Threats
+              {t("nav.threats")}
             </a>
             <a
               href="#campaign"
               className="rounded-sm px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-900"
             >
-              About
+              {t("nav.about")}
             </a>
 
             <a
               href="#report"
               className="ml-2 inline-flex items-center rounded-sm bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-rose-700/30 hover:bg-rose-700"
             >
-              Report scam
+              {t("nav.report")}
             </a>
+
+            <details className="relative ml-2">
+              <summary className="list-none">
+                <span className="inline-flex cursor-pointer items-center gap-2 rounded-sm border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
+                  <span aria-hidden>{current.flag}</span>
+                  <span className="hidden lg:inline">{current.label}</span>
+                  <span className="text-slate-400" aria-hidden>
+                    ▾
+                  </span>
+                </span>
+              </summary>
+              <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-sm border border-slate-200 bg-white shadow-lg">
+                {LANGS.map((l) => (
+                  <button
+                    key={l.lang}
+                    type="button"
+                    onClick={() => setLang(l.lang)}
+                    className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-slate-50 ${
+                      l.lang === lang ? "bg-slate-50 font-semibold text-slate-900" : "text-slate-700"
+                    }`}
+                  >
+                    <span aria-hidden>{l.flag}</span>
+                    <span>{l.label}</span>
+                  </button>
+                ))}
+              </div>
+            </details>
           </nav>
         </div>
       </Container>
