@@ -3,7 +3,11 @@ import logoPolice from "../assets/logo-police.webp";
 import { motion, useReducedMotion } from "framer-motion";
 import { easeOut, fadeUp } from "../lib/motion";
 
-export default function Header() {
+type Props = {
+  onReportClick?: () => void;
+};
+
+export default function Header({ onReportClick }: Props) {
   const reduceMotion = useReducedMotion();
 
   return (
@@ -23,6 +27,41 @@ export default function Header() {
           >
             <img src={logoPolice} alt="Politiet" className="h-14 w-auto sm:h-16" loading="eager" />
           </motion.a>
+
+          <nav className="hidden items-center gap-1 md:flex">
+            <a
+              href="#experience"
+              className="rounded-sm px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+            >
+              Experience
+            </a>
+            <a
+              href="#cases"
+              className="rounded-sm px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+            >
+              Cases
+            </a>
+            <a
+              href="#risks"
+              className="rounded-sm px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+            >
+              Threats
+            </a>
+            <a
+              href="#campaign"
+              className="rounded-sm px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+            >
+              About
+            </a>
+
+            <button
+              type="button"
+              onClick={onReportClick}
+              className="ml-2 inline-flex items-center rounded-sm bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-rose-700/30 hover:bg-rose-700"
+            >
+              Report scam
+            </button>
+          </nav>
         </div>
       </Container>
     </motion.header>

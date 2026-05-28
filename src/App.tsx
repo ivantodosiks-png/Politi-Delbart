@@ -11,12 +11,15 @@ import FaqSection from "./components/FaqSection";
 import HelpSection from "./components/HelpSection";
 import Footer from "./components/Footer";
 import { useState } from "react";
+import ReportScamModal from "./components/ReportScamModal";
 
 export default function App() {
   const [experienceOpen, setExperienceOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
 
   return (
     <div className="relative min-h-dvh bg-slate-50">
+      <div id="top" />
       {/* Subtle side lines / paper background */}
       <div
         aria-hidden="true"
@@ -29,7 +32,8 @@ export default function App() {
           backgroundRepeat: "no-repeat"
         }}
       />
-      <Header />
+      <Header onReportClick={() => setReportOpen(true)} />
+      <ReportScamModal open={reportOpen} onOpenChange={setReportOpen} />
       <main>
         <Hero />
         <VideoSection />
@@ -38,7 +42,9 @@ export default function App() {
         <BenefitsSection />
         <RiskCards />
         <CasesSection />
-        <PhoneGame open={experienceOpen} onOpenChange={setExperienceOpen} />
+        <section id="experience">
+          <PhoneGame open={experienceOpen} onOpenChange={setExperienceOpen} />
+        </section>
         <FaqSection />
         <HelpSection />
       </main>
