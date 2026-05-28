@@ -10,12 +10,20 @@ import PhoneGame from "./components/PhoneGame";
 import FaqSection from "./components/FaqSection";
 import HelpSection from "./components/HelpSection";
 import Footer from "./components/Footer";
-import { useState } from "react";
-import ReportScamModal from "./components/ReportScamModal";
+import { useEffect, useState } from "react";
+import ReportPage from "./components/ReportPage";
 
 export default function App() {
   const [experienceOpen, setExperienceOpen] = useState(false);
-  const [reportOpen, setReportOpen] = useState(false);
+  const [hash, setHash] = useState(() => window.location.hash || "#top");
+
+  useEffect(() => {
+    const onHashChange = () => setHash(window.location.hash || "#top");
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
+  const isReport = hash === "#report";
 
   return (
     <div className="relative min-h-dvh bg-slate-50">
@@ -32,23 +40,28 @@ export default function App() {
           backgroundRepeat: "no-repeat"
         }}
       />
-      <Header onReportClick={() => setReportOpen(true)} />
-      <ReportScamModal open={reportOpen} onOpenChange={setReportOpen} />
-      <main>
-        <Hero />
-        <VideoSection />
-        <ProcessSection />
-        <InfoSection />
-        <BenefitsSection />
-        <RiskCards />
-        <CasesSection />
-        <section id="experience">
-          <PhoneGame open={experienceOpen} onOpenChange={setExperienceOpen} />
-        </section>
-        <FaqSection />
-        <HelpSection />
-      </main>
-      <Footer />
+      <Header />
+      {isReport ? (
+        <ReportPage />
+      ) : (
+        <>
+          <main>
+            <Hero />
+            <VideoSection />
+            <ProcessSection />
+            <InfoSection />
+            <BenefitsSection />
+            <RiskCards />
+            <CasesSection />
+            <section id="experience">
+              <PhoneGame open={experienceOpen} onOpenChange={setExperienceOpen} />
+            </section>
+            <FaqSection />
+            <HelpSection />
+          </main>
+          <Footer />
+        </>
+      )}
     </div>
   );
 }

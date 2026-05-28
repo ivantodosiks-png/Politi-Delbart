@@ -3,11 +3,7 @@ import logoPolice from "../assets/logo-police.webp";
 import { motion, useReducedMotion } from "framer-motion";
 import { easeOut, fadeUp } from "../lib/motion";
 
-type Props = {
-  onReportClick?: () => void;
-};
-
-export default function Header({ onReportClick }: Props) {
+export default function Header() {
   const reduceMotion = useReducedMotion();
 
   return (
@@ -54,13 +50,12 @@ export default function Header({ onReportClick }: Props) {
               About
             </a>
 
-            <button
-              type="button"
-              onClick={onReportClick}
+            <a
+              href="#report"
               className="ml-2 inline-flex items-center rounded-sm bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-rose-700/30 hover:bg-rose-700"
             >
               Report scam
-            </button>
+            </a>
           </nav>
         </div>
       </Container>
