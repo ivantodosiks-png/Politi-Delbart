@@ -12,6 +12,7 @@ import HelpSection from "./components/HelpSection";
 import Footer from "./components/Footer";
 import { useEffect, useState } from "react";
 import ReportPage from "./components/ReportPage";
+import LiveSupportChat from "./components/LiveSupportChat";
 
 export default function App() {
   const [experienceOpen, setExperienceOpen] = useState(false);
@@ -62,6 +63,7 @@ export default function App() {
           <Footer />
         </>
       )}
+      <LiveSupportChat />
     </div>
   );
 }

@@ -22,6 +22,18 @@ const DICTS: Record<Lang, Dict> = {
     "common.more": "Vis mer",
     "common.less": "Skjul",
 
+    "support.title": "Live support",
+    "support.subtitle": "Spør et spørsmål – få raske råd",
+    "support.open": "Åpne chat",
+    "support.close": "Lukk chat",
+    "support.send": "Send",
+    "support.typing": "Skriver…",
+    "support.placeholder": "Skriv her…",
+    "support.welcome_title": "Hei! Hvordan kan vi hjelpe?",
+    "support.welcome_text":
+      "Beskriv situasjonen kort. Ved akutt fare: ring 112. For råd/veiledning i Norge: 02800.",
+    "support.disclaimer": "Dette er veiledning – ikke nødnummer.",
+
     "report.title": "Meld svindel",
     "report.h1": "Send oss det du mottok",
     "report.lead": "Du kan være anonym. Navn og telefon er valgfritt — meldingen holder.",
@@ -253,6 +265,18 @@ const DICTS: Record<Lang, Dict> = {
     "common.more": "Show more",
     "common.less": "Hide",
 
+    "support.title": "Live support",
+    "support.subtitle": "Ask a question — get quick guidance",
+    "support.open": "Open chat",
+    "support.close": "Close chat",
+    "support.send": "Send",
+    "support.typing": "Typing…",
+    "support.placeholder": "Type here…",
+    "support.welcome_title": "Hi! How can we help?",
+    "support.welcome_text":
+      "Briefly describe what happened. If you’re in immediate danger, call emergency services.",
+    "support.disclaimer": "Guidance only — not emergency services.",
+
     "report.title": "Report scam",
     "report.h1": "Send us what you received",
     "report.lead": "You can stay anonymous. Name and phone are optional — the message is enough.",
@@ -479,6 +503,18 @@ const DICTS: Record<Lang, Dict> = {
 
     "common.more": "Показати більше",
     "common.less": "Приховати",
+
+    "support.title": "Підтримка",
+    "support.subtitle": "Постав запитання — отримай пораду",
+    "support.open": "Відкрити чат",
+    "support.close": "Закрити чат",
+    "support.send": "Надіслати",
+    "support.typing": "Друкує…",
+    "support.placeholder": "Напиши тут…",
+    "support.welcome_title": "Привіт! Як допомогти?",
+    "support.welcome_text":
+      "Коротко опиши ситуацію. Якщо є негайна небезпека — телефонуй на екстрені служби.",
+    "support.disclaimer": "Лише поради — не екстрена служба.",
 
     "report.title": "Повідомити про шахрайство",
     "report.h1": "Надішліть нам те, що ви отримали",
