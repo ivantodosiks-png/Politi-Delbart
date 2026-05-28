@@ -1,13 +1,78 @@
+import { useEffect, useId, useRef, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import Container from "./Container";
 import logoPolice from "../assets/logo-police.webp";
-import { motion, useReducedMotion } from "framer-motion";
 import { easeOut, fadeUp } from "../lib/motion";
 import { LANGS, useI18n } from "../i18n/i18n";
+
+function Flag({ lang }: { lang: "no" | "en" | "uk" }) {
+  // Inline SVG flags so we don't depend on emoji font support.
+  if (lang === "no") {
+    return (
+      <svg
+        viewBox="0 0 22 16"
+        className="h-4 w-[22px] overflow-hidden rounded-[2px] ring-1 ring-black/10"
+        aria-hidden
+      >
+        <rect width="22" height="16" fill="#BA0C2F" />
+        <rect x="0" y="6" width="22" height="4" fill="#FFFFFF" />
+        <rect x="6" y="0" width="4" height="16" fill="#FFFFFF" />
+        <rect x="0" y="7" width="22" height="2" fill="#00205B" />
+        <rect x="7" y="0" width="2" height="16" fill="#00205B" />
+      </svg>
+    );
+  }
+
+  if (lang === "uk") {
+    return (
+      <svg
+        viewBox="0 0 22 16"
+        className="h-4 w-[22px] overflow-hidden rounded-[2px] ring-1 ring-black/10"
+        aria-hidden
+      >
+        <rect width="22" height="8" y="0" fill="#0057B7" />
+        <rect width="22" height="8" y="8" fill="#FFD700" />
+      </svg>
+    );
+  }
+
+  // en (GB)
+  return (
+    <svg
+      viewBox="0 0 22 16"
+      className="h-4 w-[22px] overflow-hidden rounded-[2px] ring-1 ring-black/10"
+      aria-hidden
+    >
+      <rect width="22" height="16" fill="#012169" />
+      <path d="M0 0 L22 16 M22 0 L0 16" stroke="#FFFFFF" strokeWidth="3.5" />
+      <path d="M0 0 L22 16 M22 0 L0 16" stroke="#C8102E" strokeWidth="2" />
+      <rect x="9" y="0" width="4" height="16" fill="#FFFFFF" />
+      <rect x="0" y="6" width="22" height="4" fill="#FFFFFF" />
+      <rect x="10" y="0" width="2" height="16" fill="#C8102E" />
+      <rect x="0" y="7" width="22" height="2" fill="#C8102E" />
+    </svg>
+  );
+}
 
 export default function Header() {
   const reduceMotion = useReducedMotion();
   const { lang, setLang, t } = useI18n();
   const current = LANGS.find((l) => l.lang === lang) ?? LANGS[0]!;
+
+  const detailsRef = useRef<HTMLDetailsElement | null>(null);
+  const menuId = useId();
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      const el = detailsRef.current;
+      if (!el) return;
+      if (e.target instanceof Node && el.contains(e.target)) return;
+      setLangMenuOpen(false);
+    };
+    document.addEventListener("click", onDocClick);
+    return () => document.removeEventListener("click", onDocClick);
+  }, []);
 
   return (
     <motion.header
@@ -60,27 +125,38 @@ export default function Header() {
               {t("nav.report")}
             </a>
 
-            <details className="relative ml-2">
-              <summary className="list-none">
+            <details
+              ref={detailsRef}
+              className="relative ml-2"
+              open={langMenuOpen}
+              onToggle={(e) => setLangMenuOpen((e.target as HTMLDetailsElement).open)}
+            >
+              <summary className="list-none" aria-controls={menuId}>
                 <span className="inline-flex cursor-pointer items-center gap-2 rounded-sm border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
-                  <span aria-hidden>{current.flag}</span>
+                  <Flag lang={current.lang} />
                   <span>{current.label}</span>
                   <span className="text-slate-400" aria-hidden>
                     ▾
                   </span>
                 </span>
               </summary>
-              <div className="absolute right-0 mt-2 w-44 overflow-hidden rounded-sm border border-slate-200 bg-white shadow-lg">
+              <div
+                id={menuId}
+                className="absolute right-0 mt-2 w-44 overflow-hidden rounded-sm border border-slate-200 bg-white shadow-lg"
+              >
                 {LANGS.map((l) => (
                   <button
                     key={l.lang}
                     type="button"
-                    onClick={() => setLang(l.lang)}
+                    onClick={() => {
+                      setLang(l.lang);
+                      setLangMenuOpen(false);
+                    }}
                     className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-slate-50 ${
                       l.lang === lang ? "bg-slate-50 font-semibold text-slate-900" : "text-slate-700"
                     }`}
                   >
-                    <span aria-hidden>{l.flag}</span>
+                    <Flag lang={l.lang} />
                     <span>{l.label}</span>
                   </button>
                 ))}
@@ -92,3 +168,4 @@ export default function Header() {
     </motion.header>
   );
 }
+

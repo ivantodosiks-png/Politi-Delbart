@@ -2,10 +2,10 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 
 export type Lang = "no" | "en" | "uk";
 
-export const LANGS: Array<{ lang: Lang; label: string; flag: string }> = [
-  { lang: "no", label: "NO", flag: "🇳🇴" },
-  { lang: "en", label: "EN", flag: "🇬🇧" },
-  { lang: "uk", label: "UA", flag: "🇺🇦" }
+export const LANGS: Array<{ lang: Lang; label: string }> = [
+  { lang: "no", label: "NO" },
+  { lang: "en", label: "EN" },
+  { lang: "uk", label: "UA" }
 ];
 
 type Dict = Record<string, string>;
