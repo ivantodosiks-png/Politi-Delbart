@@ -1,7 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useMemo, useState } from "react";
 import { X } from "lucide-react";
-import { supabase } from "../lib/supabaseClient";
+import { getSupabase, hasSupabaseConfig } from "../lib/supabaseClient";
 
 type Props = {
   open: boolean;
@@ -18,12 +18,25 @@ export default function ReportScamModal({ open, onOpenChange }: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<null | { tone: "ok" | "bad"; text: string }>(null);
 
-  const canSubmit = useMemo(() => message.trim().length >= 5 && !submitting, [message, submitting]);
+  const canSubmit = useMemo(
+    () => hasSupabaseConfig && message.trim().length >= 5 && !submitting,
+    [message, submitting]
+  );
 
   async function submit() {
     if (!canSubmit) return;
     setSubmitting(true);
     setResult(null);
+
+    const supabase = getSupabase();
+    if (!supabase) {
+      setResult({
+        tone: "bad",
+        text: "Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env and restart dev server."
+      });
+      setSubmitting(false);
+      return;
+    }
 
     const { error } = await supabase.from("scam_reports").insert({
       first_name: firstName.trim() || null,
@@ -93,6 +106,12 @@ export default function ReportScamModal({ open, onOpenChange }: Props) {
             </div>
 
             <div className="space-y-4 p-5">
+              {!hasSupabaseConfig ? (
+                <div className="rounded-sm border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                  Supabase env vars missing. Add <code>VITE_SUPABASE_URL</code> and{" "}
+                  <code>VITE_SUPABASE_ANON_KEY</code> in <code>.env</code>, then restart the dev server.
+                </div>
+              ) : null}
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="grid gap-1 text-sm">
                   <span className="font-semibold text-slate-800">First name (optional)</span>
@@ -171,4 +190,3 @@ export default function ReportScamModal({ open, onOpenChange }: Props) {
     </AnimatePresence>
   );
 }
-
