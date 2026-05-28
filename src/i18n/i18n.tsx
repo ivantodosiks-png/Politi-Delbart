@@ -23,7 +23,7 @@ const DICTS: Record<Lang, Dict> = {
     "common.less": "Skjul",
 
     "support.title": "Live support",
-    "support.subtitle": "Spør et spørsmål – få raske råd",
+    "support.subtitle": "Spør her",
     "support.open": "Åpne chat",
     "support.close": "Lukk chat",
     "support.send": "Send",
@@ -31,8 +31,8 @@ const DICTS: Record<Lang, Dict> = {
     "support.placeholder": "Skriv her…",
     "support.welcome_title": "Hei! Hvordan kan vi hjelpe?",
     "support.welcome_text":
-      "Beskriv situasjonen kort. Ved akutt fare: ring 112. For råd/veiledning i Norge: 02800.",
-    "support.disclaimer": "Dette er veiledning – ikke nødnummer.",
+      "Kort: hva skjedde? Akutt fare: 112.",
+    "support.disclaimer": "Veiledning – ikke nødnummer.",
 
     "report.title": "Meld svindel",
     "report.h1": "Send oss det du mottok",
@@ -266,7 +266,7 @@ const DICTS: Record<Lang, Dict> = {
     "common.less": "Hide",
 
     "support.title": "Live support",
-    "support.subtitle": "Ask a question — get quick guidance",
+    "support.subtitle": "Ask here",
     "support.open": "Open chat",
     "support.close": "Close chat",
     "support.send": "Send",
@@ -274,8 +274,8 @@ const DICTS: Record<Lang, Dict> = {
     "support.placeholder": "Type here…",
     "support.welcome_title": "Hi! How can we help?",
     "support.welcome_text":
-      "Briefly describe what happened. If you’re in immediate danger, call emergency services.",
-    "support.disclaimer": "Guidance only — not emergency services.",
+      "Briefly: what happened? Immediate danger: call emergency services.",
+    "support.disclaimer": "Guidance only.",
 
     "report.title": "Report scam",
     "report.h1": "Send us what you received",
@@ -505,7 +505,7 @@ const DICTS: Record<Lang, Dict> = {
     "common.less": "Приховати",
 
     "support.title": "Підтримка",
-    "support.subtitle": "Постав запитання — отримай пораду",
+    "support.subtitle": "Запитай тут",
     "support.open": "Відкрити чат",
     "support.close": "Закрити чат",
     "support.send": "Надіслати",
@@ -513,8 +513,8 @@ const DICTS: Record<Lang, Dict> = {
     "support.placeholder": "Напиши тут…",
     "support.welcome_title": "Привіт! Як допомогти?",
     "support.welcome_text":
-      "Коротко опиши ситуацію. Якщо є негайна небезпека — телефонуй на екстрені служби.",
-    "support.disclaimer": "Лише поради — не екстрена служба.",
+      "Коротко: що сталося? Негайна небезпека — екстрені служби.",
+    "support.disclaimer": "Лише поради.",
 
     "report.title": "Повідомити про шахрайство",
     "report.h1": "Надішліть нам те, що ви отримали",

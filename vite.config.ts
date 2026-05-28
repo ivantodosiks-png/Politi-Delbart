@@ -8,6 +8,8 @@ function apiChatDevPlugin(): Plugin {
     name: "api-chat-dev",
     configureServer(server) {
       server.middlewares.use("/api/chat", async (req, res) => {
+        res.setHeader("Content-Type", "application/json; charset=utf-8");
+
         if (req.method !== "POST") {
           res.statusCode = 405;
           res.setHeader("Allow", "POST");
@@ -26,7 +28,16 @@ function apiChatDevPlugin(): Plugin {
           const chunks: Buffer[] = [];
           for await (const chunk of req) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
           const raw = Buffer.concat(chunks).toString("utf8");
-          const body = raw.length ? JSON.parse(raw) : {};
+          let body: unknown = {};
+          if (raw.length) {
+            try {
+              body = JSON.parse(raw);
+            } catch {
+              res.statusCode = 400;
+              res.end(JSON.stringify({ error: "Invalid JSON body" }));
+              return;
+            }
+          }
 
           const messages = cleanClientMessages((body as any)?.messages);
           if (messages.length === 0) {
@@ -39,11 +50,9 @@ function apiChatDevPlugin(): Plugin {
           const { text } = await runLiveSupportChat({ apiKey, messages, lang });
 
           res.statusCode = 200;
-          res.setHeader("Content-Type", "application/json; charset=utf-8");
           res.end(JSON.stringify({ text }));
         } catch (err: any) {
           res.statusCode = 500;
-          res.setHeader("Content-Type", "application/json; charset=utf-8");
           res.end(JSON.stringify({ error: err?.message ?? "Server error" }));
         }
       });
