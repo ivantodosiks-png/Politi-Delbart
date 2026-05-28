@@ -3,30 +3,19 @@ import SectionTitle from "./SectionTitle";
 import StaggerGrid, { StaggerItem } from "./motion/StaggerGrid";
 import FadeIn from "./motion/FadeIn";
 import CollapsibleText from "./CollapsibleText";
-
-const steps = [
-  {
-    n: "1",
-    title: "Les grunnleggende",
-    text: "Konsekvenser, røde flagg og sjekkliste – slik at du kjenner mønstrene før noe skjer."
-  },
-  {
-    n: "2",
-    title: "Prøv scenarioet",
-    text: "Et kort, fiktivt forløp i en chat-app. Du velger selv: ignorere, åpne eller gi tillatelse."
-  },
-  {
-    n: "3",
-    title: "Velg neste steg",
-    text: "Hjelp, 02800 eller en voksen du stoler på. Du har ikke gjort noe galt ved å be om støtte."
-  }
-];
+import { useI18n } from "../i18n/i18n";
 
 export default function ProcessSection() {
+  const { t } = useI18n();
+  const steps = [
+    { n: "1", title: t("process.step1.title"), text: t("process.step1.text") },
+    { n: "2", title: t("process.step2.title"), text: t("process.step2.text") },
+    { n: "3", title: t("process.step3.title"), text: t("process.step3.text") }
+  ];
   const audiences = [
-    { label: "Ungdom", text: "før du sender, klikker eller svarer på press." },
-    { label: "Foreldre", text: "samtale hjemme om samtykke og hva barnet skal gjøre." },
-    { label: "Skole", text: "undervisning, klassemøte og digital kompetanse." }
+    { label: t("process.aud1.label"), text: t("process.aud1.text") },
+    { label: t("process.aud2.label"), text: t("process.aud2.text") },
+    { label: t("process.aud3.label"), text: t("process.aud3.text") }
   ];
 
   return (
@@ -34,12 +23,11 @@ export default function ProcessSection() {
       <Container>
         <div className="py-12 sm:py-14">
           <SectionTitle
-            eyebrow="Slik bruker du siden"
-            title="Tre steg – fra forståelse til handling"
+            eyebrow={t("process.eyebrow")}
+            title={t("process.title")}
             description={
               <CollapsibleText lines={2} className="text-sm leading-relaxed text-slate-700">
-                Siden er bygget for å gi deg oversikt før du tar valg på ekte. Bruk den i den
-                rekkefølgen som passer deg.
+                {t("process.desc")}
               </CollapsibleText>
             }
           />
@@ -51,7 +39,7 @@ export default function ProcessSection() {
                 className="h-full rounded-sm border border-slate-200 bg-white p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
               >
                 <div className="text-xs font-semibold uppercase tracking-wider text-blue-700">
-                  Steg {s.n}
+                  {t("process.step_label")} {s.n}
                 </div>
                 <div className="mt-2 text-sm font-semibold text-slate-900">{s.title}</div>
                 <CollapsibleText lines={3} className="mt-2 text-sm leading-relaxed text-slate-700">
@@ -62,7 +50,7 @@ export default function ProcessSection() {
           </StaggerGrid>
 
           <FadeIn className="mt-10 rounded-sm border border-slate-200 bg-slate-50 p-6 text-sm text-slate-700">
-            <div className="font-semibold text-slate-900">For hvem er dette?</div>
+            <div className="font-semibold text-slate-900">{t("process.for_who")}</div>
             <ul className="mt-2 list-disc space-y-1 pl-5">
               <li>
                 <span className="font-semibold">{audiences[0]!.label}</span> – {audiences[0]!.text}
@@ -70,7 +58,7 @@ export default function ProcessSection() {
             </ul>
             <details className="mt-2">
               <summary className="cursor-pointer text-xs font-semibold text-blue-700 hover:text-blue-800">
-                Vis mer
+                {t("common.more")}
               </summary>
               <ul className="mt-2 list-disc space-y-1 pl-5">
                 {audiences.slice(1).map((a) => (

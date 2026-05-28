@@ -2,51 +2,28 @@
 import SectionTitle from "./SectionTitle";
 import { motion, useReducedMotion } from "framer-motion";
 import { EyeOff, Link2, MessageCircleWarning, Siren, Smartphone, TriangleAlert } from "lucide-react";
-
-const cards = [
-  {
-    icon: Link2,
-    title: "Lenker kan se helt riktige ut",
-    text: "Angripere kopierer design, logo og språk. Det som avslører dem, er ofte domenet, hastverket og at de ber om mer enn de trenger."
-  },
-  {
-    icon: Smartphone,
-    title: "Én «Allow» kan gi full tilgang",
-    text: "Tillatelse til bilder eller kamera på en ukjent side kan brukes til utpressing senere – også uten at du merker det med én gang."
-  },
-  {
-    icon: MessageCircleWarning,
-    title: "Panikk er et verktøy",
-    text: "Når noen vil at du skal handle raskt, tenker du mindre. Ta en pause på 30 sekunder: «Hvem sendte dette, og hvorfor nå?»"
-  },
-  {
-    icon: EyeOff,
-    title: "Det du deler, kan ikke «tas tilbake»",
-    text: "Sletting hos deg stopper ikke kopier, skjermbilder eller videre deling. Derfor gjelder samtykke og tenking før sending."
-  },
-  {
-    icon: Siren,
-    title: "Utpressing bygger på skam",
-    text: "Mange ofre betaler eller sender mer fordi de er redde. Politiet anbefaler: ikke betal, ta bevis, blokker, meld fra."
-  },
-  {
-    icon: TriangleAlert,
-    title: "Konsekvenser er reelle",
-    text: "Rykter, mobbing, stress, skolearbeid og i alvorlige tilfeller politietterforskning. Tidlig hjelp begrenser skaden."
-  }
-];
+import { useI18n } from "../i18n/i18n";
 
 export default function RiskCards() {
   const reduceMotion = useReducedMotion();
+  const { t } = useI18n();
+  const cards = [
+    { icon: Link2, title: t("risks.1.title"), text: t("risks.1.text") },
+    { icon: Smartphone, title: t("risks.2.title"), text: t("risks.2.text") },
+    { icon: MessageCircleWarning, title: t("risks.3.title"), text: t("risks.3.text") },
+    { icon: EyeOff, title: t("risks.4.title"), text: t("risks.4.text") },
+    { icon: Siren, title: t("risks.5.title"), text: t("risks.5.text") },
+    { icon: TriangleAlert, title: t("risks.6.title"), text: t("risks.6.text") }
+  ];
 
   return (
     <section id="risks" className="border-t border-slate-200 bg-white">
       <Container>
         <div className="py-12 sm:py-14">
           <SectionTitle
-            eyebrow="Konsekvenser og valg"
-            title="Hva kan skje – og hva du kan gjøre med én gang"
-            description="Hvert punkt er et stopp‑punkt: les det, ta ett trygt valg, og gå videre."
+            eyebrow={t("risks.eyebrow")}
+            title={t("risks.title")}
+            description={t("risks.desc")}
           />
 
           <div className="mt-10 grid gap-4 md:grid-cols-2">
@@ -78,19 +55,19 @@ export default function RiskCards() {
           </div>
 
           <div className="mt-10 rounded-sm border border-slate-200 bg-slate-50 p-6 text-sm text-slate-700">
-            <div className="font-semibold text-slate-900">Sjekklista før du klikker</div>
+            <div className="font-semibold text-slate-900">{t("risks.checklist_title")}</div>
             <ol className="mt-2 list-decimal space-y-1 pl-5">
-              <li>Kjenner jeg avsenderen – og passer meldingen til dem?</li>
-              <li>Er domenet helt riktig (ingen ekstra ord, bindestrek, .net i stedet for .com)?</li>
+              <li>{t("risks.check1")}</li>
+              <li>{t("risks.check2")}</li>
             </ol>
             <details className="mt-2">
               <summary className="cursor-pointer text-xs font-semibold text-blue-700 hover:text-blue-800">
-                Vis hele sjekklista
+                {t("risks.check_more")}
               </summary>
               <ol className="mt-2 list-decimal space-y-1 pl-5">
-                <li>Ber siden om bilder, kamera eller innlogging jeg ikke trenger?</li>
-                <li>Føler jeg meg presset? → Stopp, vis meldingen til en voksen.</li>
-                <li>Hva er verste utfall – og er det verdt risikoen?</li>
+                <li>{t("risks.check3")}</li>
+                <li>{t("risks.check4")}</li>
+                <li>{t("risks.check5")}</li>
               </ol>
             </details>
           </div>

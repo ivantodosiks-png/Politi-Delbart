@@ -1,37 +1,26 @@
 ﻿import Container from "./Container";
 import SectionTitle from "./SectionTitle";
 import { motion, useReducedMotion } from "framer-motion";
-
-const benefits = [
-  {
-    title: "Mindre spredning",
-    text: "Jo raskere du stopper, jo færre kopier og skjermbilder finnes ute."
-  },
-  {
-    title: "Bedre bevis",
-    text: "Tidlig dokumentasjon gjør det enklere for politiet og skolen å følge opp."
-  },
-  {
-    title: "Mindre stress",
-    text: "Du slipper å bære hemmeligheten alene når du snakker med noen du stoler på."
-  },
-  {
-    title: "Tydeligere valg",
-    text: "02800 og trygge voksne kan veilede uten at du må gjette hva som er riktig."
-  }
-];
+import { useI18n } from "../i18n/i18n";
 
 export default function BenefitsSection() {
   const reduceMotion = useReducedMotion();
+  const { t } = useI18n();
+  const benefits = [
+    { title: t("benefits.1.title"), text: t("benefits.1.text") },
+    { title: t("benefits.2.title"), text: t("benefits.2.text") },
+    { title: t("benefits.3.title"), text: t("benefits.3.text") },
+    { title: t("benefits.4.title"), text: t("benefits.4.text") }
+  ];
 
   return (
     <section id="benefits" className="border-t border-slate-200 bg-white">
       <Container>
         <div className="py-12 sm:py-14">
           <SectionTitle
-            eyebrow="Hvorfor handle tidlig"
-            title="Fordeler med å ta grep med én gang"
-            description="Små handlinger tidlig kan begrense skade – for deg og for andre."
+            eyebrow={t("benefits.eyebrow")}
+            title={t("benefits.title")}
+            description={t("benefits.desc")}
           />
 
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

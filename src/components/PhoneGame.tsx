@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import CollapsibleText from "./CollapsibleText";
+import { useI18n } from "../i18n/i18n";
 
 type Screen = "inbox" | "thread" | "fake_site";
 type Phase =
@@ -659,6 +660,7 @@ export default function PhoneGame({
   open: boolean;
   onOpenChange: (v: boolean) => void;
 }) {
+  const { t } = useI18n();
   const reduceMotion = useReducedMotion();
   const [screen, setScreen] = useState<Screen>("inbox");
   const [phase, setPhase] = useState<Phase>("idle");
@@ -1039,9 +1041,9 @@ export default function PhoneGame({
       <Container>
         <div className="py-12 sm:py-14">
           <SectionTitle
-            eyebrow="Interaktiv øvelse"
-            title="Opplev phishing og sextortion – trygt"
-            description="Et kort, fiktivt scenario i en chat-app. Du velger selv: ignorere, åpne eller gi tillatelse. Ingen ekte data samles inn – målet er å lære mønstrene før det skjer på ekte."
+            eyebrow={t("experience.eyebrow")}
+            title={t("experience.title")}
+            description={t("experience.desc")}
           />
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -1050,7 +1052,7 @@ export default function PhoneGame({
               onClick={openExperience}
               className="inline-flex items-center justify-center gap-2 rounded-full bg-blue-700 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-800"
             >
-              Start øvelsen
+              {t("experience.start")}
             </button>
           </div>
         </div>
@@ -1071,7 +1073,7 @@ export default function PhoneGame({
                 onClick={closeExperience}
                 className="rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/15"
               >
-                Lukk (Esc)
+                {t("experience.close")} (Esc)
               </button>
             </div>
 

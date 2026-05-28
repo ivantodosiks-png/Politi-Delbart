@@ -1,19 +1,20 @@
 ﻿import Container from "./Container";
 import SectionTitle from "./SectionTitle";
 import CollapsibleText from "./CollapsibleText";
+import { useI18n } from "../i18n/i18n";
 
 export default function VideoSection() {
+  const { t } = useI18n();
   return (
     <section className="border-t border-slate-200 bg-white">
       <Container>
         <div className="py-12 sm:py-14">
           <SectionTitle
-            eyebrow="Video"
-            title="Se et kort eksempel"
+            eyebrow={t("video.eyebrow")}
+            title={t("video.title")}
             description={
               <CollapsibleText lines={2} className="text-sm leading-relaxed text-slate-700">
-                Vil du se en video om temaet? Trykk for å åpne avspilleren. Tekst på siden er holdt kort – du kan
-                også utvide for å lese mer.
+                {t("video.desc")}
               </CollapsibleText>
             }
           />
@@ -33,14 +34,17 @@ export default function VideoSection() {
           </div>
 
           <div className="mt-4 rounded-sm border border-slate-200 bg-slate-50 p-5 text-sm text-slate-700">
-            <CollapsibleText lines={3} className="leading-relaxed" moreLabel="Vis mer" lessLabel="Skjul">
+            <CollapsibleText
+              lines={3}
+              className="leading-relaxed"
+              moreLabel={t("common.more")}
+              lessLabel={t("common.less")}
+            >
               <p>
-                Ønsker du å holde foredrag for barn og unge om deling av seksualiserte bilder? Undervisningsopplegget
-                «Delbart?» er tilrettelagt slik at lærere, helsesykepleiere, miljøarbeidere, utekontakter og andre
-                voksne som jobber med barn og unge kan holde foredrag.
+                {t("video.box_p1")}
               </p>
               <p className="mt-3">
-                <span className="font-semibold">Laget av:</span> WergelandApenes/Atyp/Ferdi
+                <span className="font-semibold">{t("video.made_by")}:</span> WergelandApenes/Atyp/Ferdi
               </p>
             </CollapsibleText>
           </div>

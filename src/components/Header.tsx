@@ -64,7 +64,7 @@ export default function Header() {
               <summary className="list-none">
                 <span className="inline-flex cursor-pointer items-center gap-2 rounded-sm border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50">
                   <span aria-hidden>{current.flag}</span>
-                  <span className="hidden lg:inline">{current.label}</span>
+                  <span>{current.label}</span>
                   <span className="text-slate-400" aria-hidden>
                     ▾
                   </span>
