@@ -5,34 +5,14 @@ import { useI18n } from "../i18n/i18n";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-const STORAGE_KEY = "live_support_chat_v1";
-
-function safeParseMessages(raw: string | null): Msg[] {
-  if (!raw) return [];
-  try {
-    const data = JSON.parse(raw);
-    if (!Array.isArray(data)) return [];
-    return data
-      .filter((m) => (m?.role === "user" || m?.role === "assistant") && typeof m?.content === "string")
-      .map((m) => ({ role: m.role as Msg["role"], content: String(m.content).slice(0, 2000) }))
-      .slice(-20);
-  } catch {
-    return [];
-  }
-}
-
 export default function LiveSupportChat() {
   const { lang, t } = useI18n();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
-  const [messages, setMessages] = useState<Msg[]>(() => safeParseMessages(localStorage.getItem(STORAGE_KEY)));
+  const [messages, setMessages] = useState<Msg[]>([]);
   const scrollRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages.slice(-20)));
-  }, [messages]);
 
   useEffect(() => {
     if (!open) return;
@@ -94,7 +74,7 @@ export default function LiveSupportChat() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.98 }}
             transition={{ type: "spring", stiffness: 420, damping: 34 }}
-            className="w-[392px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl"
+            className="w-[440px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl"
           >
             <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-gradient-to-b from-slate-50 to-white px-5 py-4">
               <div className="min-w-0">
@@ -111,7 +91,10 @@ export default function LiveSupportChat() {
               </button>
             </div>
 
-            <div ref={scrollRef} className="max-h-[58vh] space-y-3 overflow-auto bg-white px-5 py-4">
+            <div
+              ref={scrollRef}
+              className="h-[520px] max-h-[70vh] space-y-3 overflow-auto bg-white px-5 py-4"
+            >
               {messages.length === 0 ? (
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-700">
                   <div className="font-medium text-slate-900">{t("support.welcome_title")}</div>
